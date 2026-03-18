@@ -45,3 +45,4 @@ coverage/
 
 # Hardhat 部署产物（地址记录在 sdk，不提交 ignition 缓存）
 ignition/deployments/
+tsconfig.tsbuildinfo

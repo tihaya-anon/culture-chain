@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Providers } from "./providers"
+import { Navbar } from "@/components/layout/Navbar"
 import "@culture-chain/ui/globals.css"
 
 export const metadata: Metadata = {
@@ -19,9 +20,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <body>
+      <body className="min-h-screen bg-stone-50 text-stone-900">
         <Providers>
-          {children}
+          <Navbar />
+          <div className="animate-fade-in">
+            {children}
+          </div>
         </Providers>
       </body>
     </html>
