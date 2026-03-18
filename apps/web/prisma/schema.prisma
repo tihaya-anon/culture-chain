@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── 枚举 ──────────────────────────────────────────────────────
+
+enum WorkCategory {
+  painting
+  book
+  film
+  music
+  other
+}
+
+// ── 用户 / 店铺 ───────────────────────────────────────────────
+
+model Shop {
+  id          String   @id               // 以太坊地址
+  name        String   @unique
+  description String?
+  avatarIPFS  String?
+  bannerIPFS  String?
+  metadataURI String?
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  works       Work[]
+
+  @@map("shops")
+}
+
+// ── 作品 ──────────────────────────────────────────────────────
+
+model Work {
+  id              String       @id @default(cuid())
+  tokenId         String       @unique               // 链上 tokenId（字符串，避免 BigInt 精度问题）
+  contractAddress String
+
+  creatorAddress  String
+  creator         Shop         @relation(fields: [creatorAddress], references: [id])
+
+  title           String
+  description     String?
+  category        WorkCategory
+  coverIPFS       String
+  contentIPFS     String?
+  metadataURI     String
+  contentHash     String?      @unique               // SHA-256 哈希，版权核查
+
+  royaltyBps      Int                                // 版税率 basis points
+  supply          Int          @default(0)           // 总发行量 (0=无限)
+  sold            Int          @default(0)
+  priceWei        String?                            // 当前上架价格（wei 字符串）
+  listingId       String?                            // 对应 Marketplace 上架 ID
+
+  txHash          String?                            // 铸造交易哈希
+  blockNumber     Int?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  transactions    Transaction[]
+
+  @@index([creatorAddress])
+  @@index([category])
+  @@index([createdAt])
+  @@map("works")
+}
+
+// ── 交易记录 ──────────────────────────────────────────────────
+
+enum TransactionType {
+  sale
+  offer_accepted
+  transfer
+}
+
+model Transaction {
+  id             String          @id @default(cuid())
+  txHash         String          @unique
+  type           TransactionType
+
+  tokenId        String
+  work           Work            @relation(fields: [tokenId], references: [tokenId])
+
+  fromAddress    String
+  toAddress      String
+  amount         Int             @default(1)
+  priceWei       String?
+  royaltyWei     String?
+  platformFeeWei String?
+
+  blockNumber    Int
+  timestamp      DateTime
+
+  createdAt      DateTime        @default(now())
+
+  @@index([tokenId])
+  @@index([toAddress])
+  @@index([timestamp])
+  @@map("transactions")
+}

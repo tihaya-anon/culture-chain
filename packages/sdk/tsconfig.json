@@ -1,0 +1,8 @@
+{
+  "extends": "@culture-chain/config/tsconfig/react-library",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"]
+}
