@@ -1,7 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { waitForTransactionReceipt } from "wagmi/actions"
+import { useConfig } from "wagmi"
 import { Button } from "@/components/ui/Button"
+import { useBuyItem } from "@culture-chain/sdk"
 import type { Work } from "./WorkCard"
 
 type TxStatus = "idle" | "confirm" | "pending" | "success" | "error"
@@ -13,6 +17,9 @@ interface BuyModalProps {
 }
 
 export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
+  const router = useRouter()
+  const config = useConfig()
+  const { buyItemAsync } = useBuyItem()
   const [status, setStatus] = useState<TxStatus>("confirm")
   const [txHash, setTxHash] = useState<string>()
   const [errorMsg, setErrorMsg] = useState<string>()
@@ -25,11 +32,19 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
   async function handleBuy() {
     setStatus("pending")
     try {
-      // TODO: 替换为真实 wagmi writeContract 调用
-      // const result = await writeContractAsync({ ... })
-      await mockTx()
-      setTxHash("0xmock_tx_hash_here")
+      if (!work.listingId) {
+        throw new Error("当前作品没有可购买的上架单")
+      }
+
+      const hash = await buyItemAsync(
+        BigInt(work.listingId),
+        BigInt(amount),
+        BigInt(work.priceWei)
+      )
+      await waitForTransactionReceipt(config, { hash })
+      setTxHash(hash)
       setStatus("success")
+      router.refresh()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "交易失败，请重试"
       setErrorMsg(msg)
@@ -99,12 +114,12 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
             </p>
             {txHash && (
               <a
-                href={`https://polygonscan.com/tx/${txHash}`}
+                href={`http://127.0.0.1:8545`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-address text-xs text-violet-600 hover:underline"
               >
-                查看交易 →
+                交易哈希：{txHash.slice(0, 10)}...{txHash.slice(-8)}
               </a>
             )}
             <Button variant="primary" className="mt-2 w-full" onClick={onClose}>
@@ -146,13 +161,8 @@ function Row({
 }
 
 function formatMatic(wei: bigint) {
-  const matic = Number(wei) / 1e18
-  return `${matic.toFixed(4)} MATIC`
-}
-
-/** mock — 将被真实 wagmi 调用替换 */
-function mockTx() {
-  return new Promise<void>((res) => setTimeout(res, 1500))
+  const value = Number(wei) / 1e18
+  return `${value.toFixed(4)} ETH`
 }
 
 function CheckIcon({ className }: { className: string }) {

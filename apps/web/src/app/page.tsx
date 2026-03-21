@@ -1,9 +1,18 @@
 import Link from "next/link"
 import { WorkCard } from "@/components/works/WorkCard"
 import { MOCK_WORKS, MOCK_CATEGORIES_STATS } from "@/lib/mockData"
+import { getDemoWorks } from "@/lib/demo-chain"
 
-export default function HomePage() {
-  const featured = MOCK_WORKS.slice(0, 4)
+export const dynamic = "force-dynamic"
+
+export default async function HomePage() {
+  const demoWorks = await getDemoWorks()
+  const featured = (demoWorks.length > 0 ? demoWorks : MOCK_WORKS).slice(0, 4)
+  const stats = [
+    { n: String(featured.length), label: "件作品" },
+    { n: String(new Set(featured.map((work) => work.creator.address)).size), label: "位创作者" },
+    { n: String(featured.reduce((sum, work) => sum + work.sold, 0)), label: "笔成交" },
+  ]
 
   return (
     <main>
@@ -51,11 +60,7 @@ export default function HomePage() {
 
           {/* Stats */}
           <div className="mx-auto mt-14 grid max-w-sm grid-cols-3 gap-4 sm:max-w-none sm:grid-cols-3">
-            {[
-              { n: "3,497", label: "件作品" },
-              { n: "1,200+", label: "位创作者" },
-              { n: "9,800+", label: "笔成交" },
-            ].map((s) => (
+            {stats.map((s) => (
               <div key={s.label} className="text-center">
                 <div className="text-2xl font-bold text-white sm:text-3xl">{s.n}</div>
                 <div className="mt-0.5 text-sm text-violet-300">{s.label}</div>

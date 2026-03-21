@@ -11,7 +11,7 @@ function useMarketplaceAddress() {
 /** 购买上架作品 */
 export function useBuyItem() {
   const address = useMarketplaceAddress()
-  const { writeContract, ...rest } = useWriteContract()
+  const { writeContract, writeContractAsync, ...rest } = useWriteContract()
 
   const buyItem = (listingId: bigint, amount: bigint, priceWei: bigint) => {
     writeContract({
@@ -23,13 +23,22 @@ export function useBuyItem() {
     })
   }
 
-  return { buyItem, ...rest }
+  const buyItemAsync = (listingId: bigint, amount: bigint, priceWei: bigint) =>
+    writeContractAsync({
+      address,
+      abi: MARKETPLACE_ABI,
+      functionName: "buyItem",
+      args: [listingId, amount],
+      value: priceWei * amount,
+    })
+
+  return { address, buyItem, buyItemAsync, writeContract, writeContractAsync, ...rest }
 }
 
 /** 上架作品 */
 export function useListItem() {
   const address = useMarketplaceAddress()
-  const { writeContract, ...rest } = useWriteContract()
+  const { writeContract, writeContractAsync, ...rest } = useWriteContract()
 
   const listItem = (tokenId: bigint, priceEther: string, amount: bigint) => {
     writeContract({
@@ -40,7 +49,15 @@ export function useListItem() {
     })
   }
 
-  return { listItem, ...rest }
+  const listItemAsync = (tokenId: bigint, priceEther: string, amount: bigint) =>
+    writeContractAsync({
+      address,
+      abi: MARKETPLACE_ABI,
+      functionName: "listItem",
+      args: [tokenId, parseEther(priceEther), amount],
+    })
+
+  return { address, listItem, listItemAsync, writeContract, writeContractAsync, ...rest }
 }
 
 /** 查询待提取收益 */

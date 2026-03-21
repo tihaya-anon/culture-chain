@@ -1,6 +1,51 @@
 import { ethers, network } from "hardhat"
-import { writeFileSync } from "fs"
+import { mkdirSync, writeFileSync } from "fs"
 import { join } from "path"
+
+function updateLocalAddresses(contracts: {
+  ShopRegistry: string
+  CultureNFT: string
+  Marketplace: string
+}) {
+  if (network.config.chainId !== 31337) return
+
+  const target = join(__dirname, "../../../packages/sdk/src/constants/addresses.ts")
+  const content = `const envAddresses = {
+  CultureNFT: process.env["NEXT_PUBLIC_CONTRACT_CULTURE_NFT"] as \`0x\${string}\` | undefined,
+  Marketplace: process.env["NEXT_PUBLIC_CONTRACT_MARKETPLACE"] as \`0x\${string}\` | undefined,
+  ShopRegistry: process.env["NEXT_PUBLIC_CONTRACT_SHOP_REGISTRY"] as \`0x\${string}\` | undefined,
+}
+
+/**
+ * 合约地址常量
+ * 本地开发优先使用 .env.local，其次使用 deploy 脚本写回的静态值。
+ */
+export const CONTRACT_ADDRESSES = {
+  /** Polygon Mainnet (chainId: 137) */
+  137: {
+    CultureNFT: "" as \`0x\${string}\`,
+    Marketplace: "" as \`0x\${string}\`,
+    ShopRegistry: "" as \`0x\${string}\`,
+  },
+  /** Polygon Mumbai Testnet (chainId: 80001) */
+  80001: {
+    CultureNFT: "" as \`0x\${string}\`,
+    Marketplace: "" as \`0x\${string}\`,
+    ShopRegistry: "" as \`0x\${string}\`,
+  },
+  /** Hardhat Local (chainId: 31337) */
+  31337: {
+    CultureNFT: envAddresses.CultureNFT ?? "${contracts.CultureNFT}" as \`0x\${string}\`,
+    Marketplace: envAddresses.Marketplace ?? "${contracts.Marketplace}" as \`0x\${string}\`,
+    ShopRegistry: envAddresses.ShopRegistry ?? "${contracts.ShopRegistry}" as \`0x\${string}\`,
+  },
+} as const
+
+export type SupportedChainId = keyof typeof CONTRACT_ADDRESSES
+`
+
+  writeFileSync(target, content)
+}
 
 async function main() {
   const [deployer] = await ethers.getSigners()
@@ -50,7 +95,9 @@ async function main() {
   }
 
   const outPath = join(__dirname, `../ignition/deployments/${network.name}.json`)
+  mkdirSync(join(__dirname, "../ignition/deployments"), { recursive: true })
   writeFileSync(outPath, JSON.stringify(deployments, null, 2))
+  updateLocalAddresses(deployments.contracts)
 
   console.log(`\n✅ Deployment complete!`)
   console.log(`   Saved to: ${outPath}`)

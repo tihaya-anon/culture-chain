@@ -3,21 +3,23 @@ import { notFound } from "next/navigation"
 import { Badge, CATEGORY_LABELS } from "@/components/ui/Badge"
 import { WorkDetailActions } from "./WorkDetailActions"
 import { MOCK_WORKS } from "@/lib/mockData"
+import { getDemoWork } from "@/lib/demo-chain"
 
 interface WorkDetailPageProps {
   params: Promise<{ tokenId: string }>
 }
 
+export const dynamic = "force-dynamic"
+
 export async function generateMetadata({ params }: WorkDetailPageProps) {
   const { tokenId } = await params
-  const work = MOCK_WORKS.find((w) => w.tokenId === tokenId)
+  const work = await getDemoWork(tokenId) ?? MOCK_WORKS.find((w) => w.tokenId === tokenId)
   return { title: work?.title ?? "作品详情" }
 }
 
 export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
   const { tokenId } = await params
-  // TODO: 替换为真实 API 调用
-  const work = MOCK_WORKS.find((w) => w.tokenId === tokenId)
+  const work = await getDemoWork(tokenId) ?? MOCK_WORKS.find((w) => w.tokenId === tokenId)
   if (!work) notFound()
 
   const soldOut    = work.supply > 0 && work.sold >= work.supply
@@ -107,7 +109,7 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
             )}
 
             {/* 购买按钮（客户端交互，抽出为独立组件） */}
-            <WorkDetailActions work={work} soldOut={soldOut} />
+            <WorkDetailActions work={work} soldOut={soldOut || !work.listingId} />
           </div>
 
           {/* NFT Info */}
@@ -115,8 +117,8 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
             <h3 className="font-semibold text-stone-800">链上信息</h3>
             <InfoRow label="Token ID" value={`#${work.tokenId}`} mono />
             <InfoRow label="标准" value="ERC-1155" />
-            <InfoRow label="区块链" value="Polygon" />
-            <InfoRow label="版税" value="5%" />
+            <InfoRow label="区块链" value="Hardhat Local" />
+            <InfoRow label="版税" value={formatRoyalty(work as { royaltyBps?: unknown })} />
           </div>
         </div>
       </div>
@@ -131,4 +133,8 @@ function InfoRow({ label, value, mono }: { label: string; value: string; mono?: 
       <span className={`text-stone-800 ${mono ? "font-address" : ""}`}>{value}</span>
     </div>
   )
+}
+
+function formatRoyalty(work: { royaltyBps?: unknown }) {
+  return typeof work.royaltyBps === "number" ? `${work.royaltyBps / 100}%` : "5%"
 }

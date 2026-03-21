@@ -28,6 +28,55 @@ export const CULTURE_NFT_ABI = [
     ],
     outputs: [{ type: "uint256" }],
   },
+  // setApprovalForAll(address operator, bool approved)
+  {
+    type: "function",
+    name: "setApprovalForAll",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "operator", type: "address" },
+      { name: "approved", type: "bool" },
+    ],
+    outputs: [],
+  },
+  // isApprovedForAll(address account, address operator)
+  {
+    type: "function",
+    name: "isApprovedForAll",
+    stateMutability: "view",
+    inputs: [
+      { name: "account", type: "address" },
+      { name: "operator", type: "address" },
+    ],
+    outputs: [{ type: "bool" }],
+  },
+  // uri(uint256 tokenId)
+  {
+    type: "function",
+    name: "uri",
+    stateMutability: "view",
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    outputs: [{ type: "string" }],
+  },
+  // getWorkInfo(uint256 tokenId)
+  {
+    type: "function",
+    name: "getWorkInfo",
+    stateMutability: "view",
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    outputs: [
+      {
+        type: "tuple",
+        components: [
+          { name: "creator", type: "address" },
+          { name: "royaltyBps", type: "uint96" },
+          { name: "maxSupply", type: "uint256" },
+          { name: "contentHash", type: "string" },
+          { name: "category", type: "uint8" },
+        ],
+      },
+    ],
+  },
   // royaltyInfo(uint256 tokenId, uint256 salePrice)
   {
     type: "function",
@@ -59,6 +108,16 @@ export const CULTURE_NFT_ABI = [
       { name: "creator", type: "address", indexed: true },
       { name: "supply", type: "uint256", indexed: false },
       { name: "metadataURI", type: "string", indexed: false },
+    ],
+  },
+  // Event: ApprovalForAll
+  {
+    type: "event",
+    name: "ApprovalForAll",
+    inputs: [
+      { name: "account", type: "address", indexed: true },
+      { name: "operator", type: "address", indexed: true },
+      { name: "approved", type: "bool", indexed: false },
     ],
   },
 ] as const

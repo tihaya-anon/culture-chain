@@ -18,6 +18,8 @@ export interface Work {
   }
   supply: number
   sold: number
+  listingId?: string
+  availableAmount?: number
 }
 
 interface WorkCardProps {

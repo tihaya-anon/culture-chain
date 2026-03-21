@@ -58,6 +58,20 @@ export const MARKETPLACE_ABI = [
     inputs: [{ name: "account", type: "address" }],
     outputs: [{ type: "uint256" }],
   },
+  // listings(uint256)
+  {
+    type: "function",
+    name: "listings",
+    stateMutability: "view",
+    inputs: [{ name: "", type: "uint256" }],
+    outputs: [
+      { name: "seller", type: "address" },
+      { name: "tokenId", type: "uint256" },
+      { name: "pricePerUnit", type: "uint256" },
+      { name: "amount", type: "uint256" },
+      { name: "active", type: "bool" },
+    ],
+  },
   // Event: ItemListed
   {
     type: "event",
@@ -66,7 +80,8 @@ export const MARKETPLACE_ABI = [
       { name: "listingId", type: "uint256", indexed: true },
       { name: "tokenId", type: "uint256", indexed: true },
       { name: "seller", type: "address", indexed: false },
-      { name: "price", type: "uint256", indexed: false },
+      { name: "pricePerUnit", type: "uint256", indexed: false },
+      { name: "amount", type: "uint256", indexed: false },
     ],
   },
   // Event: ItemSold

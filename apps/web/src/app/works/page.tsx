@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { WorkCard } from "@/components/works/WorkCard"
 import { CategoryTabs } from "@/components/works/CategoryTabs"
 import { MOCK_WORKS } from "@/lib/mockData"
+import { getDemoWorks } from "@/lib/demo-chain"
 
 interface WorksPageProps {
   searchParams: Promise<{ category?: string; sort?: string; q?: string; page?: string }>
@@ -11,11 +12,13 @@ export function generateMetadata() {
   return { title: "探索作品" }
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function WorksPage({ searchParams }: WorksPageProps) {
   const { category, q } = await searchParams
 
-  // TODO: 替换为真实 API 调用
-  const works = MOCK_WORKS.filter((w) => {
+  const demoWorks = await getDemoWorks()
+  const works = (demoWorks.length > 0 ? demoWorks : MOCK_WORKS).filter((w) => {
     if (category && w.category !== category) return false
     if (q && !w.title.includes(q) && !w.creator.shopName.includes(q)) return false
     return true

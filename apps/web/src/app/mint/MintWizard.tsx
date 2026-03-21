@@ -1,8 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { useAccount } from "wagmi"
+import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { waitForTransactionReceipt } from "wagmi/actions"
+import { useAccount, useConfig } from "wagmi"
+import { parseEventLogs } from "viem"
 import { Button } from "@/components/ui/Button"
+import { CULTURE_NFT_ABI, useListItem, useMintWork, useSetApprovalForAll } from "@culture-chain/sdk"
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -40,11 +44,22 @@ const CATEGORIES = [
 // ── Wizard ────────────────────────────────────────────────────
 
 export function MintWizard() {
+  const router = useRouter()
+  const config = useConfig()
   const { isConnected } = useAccount()
+  const { mintWorkAsync, address: nftAddress } = useMintWork()
+  const { setApprovalForAllAsync } = useSetApprovalForAll()
+  const { listItemAsync, address: marketplaceAddress } = useListItem()
   const [step, setStep]     = useState(0)
   const [form, setForm]     = useState<FormData>(INITIAL)
   const [minting, setMinting] = useState(false)
-  const [done, setDone]     = useState(false)
+  const [done, setDone]     = useState<{ tokenId: string } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const chainReady = useMemo(
+    () => Boolean(nftAddress && marketplaceAddress),
+    [marketplaceAddress, nftAddress]
+  )
 
   if (!isConnected) {
     return (
@@ -56,7 +71,19 @@ export function MintWizard() {
     )
   }
 
-  if (done) return <MintSuccess />
+  if (!chainReady) {
+    return (
+      <div className="rounded-2xl border border-amber-100 bg-amber-50 p-8 text-center shadow-sm">
+        <p className="text-3xl">⛓️</p>
+        <p className="mt-4 font-semibold text-amber-900">本地合约还没部署</p>
+        <p className="mt-2 text-sm text-amber-800">
+          先启动 Hardhat 节点并执行 `pnpm contracts:deploy:local`，前端才会进入真实铸造流程。
+        </p>
+      </div>
+    )
+  }
+
+  if (done) return <MintSuccess tokenId={done.tokenId} />
 
   function patch(update: Partial<FormData>) {
     setForm((prev) => ({ ...prev, ...update }))
@@ -64,13 +91,36 @@ export function MintWizard() {
 
   async function handleMint() {
     setMinting(true)
+    setError(null)
     try {
-      // TODO: 真实流程：
-      // 1. POST /api/v1/works/upload  上传文件
-      // 2. 获取 metadataURI
-      // 3. writeContractAsync CultureNFT.mint(...)
-      await new Promise((r) => setTimeout(r, 2000)) // mock
-      setDone(true)
+      const metadataURI = buildMetadataURI(form)
+      const royaltyBps = Math.round(Number(form.royalty) * 100)
+      const supply = BigInt(Number(form.supply) || 0)
+      const category = categoryToIndex(form.category)
+      const contentHash = await buildContentHash(form)
+
+      const mintHash = await mintWorkAsync([
+        metadataURI,
+        BigInt(royaltyBps),
+        supply,
+        contentHash,
+        category,
+      ])
+      const mintReceipt = await waitForTransactionReceipt(config, { hash: mintHash })
+      const tokenId = extractTokenId(mintReceipt.logs)
+
+      await waitForTransactionReceipt(config, {
+        hash: await setApprovalForAllAsync(marketplaceAddress!, true),
+      })
+
+      await waitForTransactionReceipt(config, {
+        hash: await listItemAsync(tokenId, form.price, supply === 0n ? 1n : supply),
+      })
+
+      setDone({ tokenId: tokenId.toString() })
+      router.refresh()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "链上交易失败，请重试")
     } finally {
       setMinting(false)
     }
@@ -86,6 +136,11 @@ export function MintWizard() {
         {step === 1 && <Step2 form={form} patch={patch} />}
         {step === 2 && <Step3 form={form} patch={patch} />}
         {step === 3 && <Step4 form={form} minting={minting} onMint={handleMint} />}
+        {error && (
+          <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Nav */}
         <div className="mt-8 flex justify-between gap-4 border-t border-stone-100 pt-6">
@@ -397,17 +452,17 @@ function Step4({
   )
 }
 
-function MintSuccess() {
+function MintSuccess({ tokenId }: { tokenId: string }) {
   return (
     <div className="flex flex-col items-center gap-5 rounded-2xl border border-stone-100 bg-white py-16 text-center shadow-sm">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl">
         🎉
       </div>
       <h2 className="font-serif text-2xl font-bold text-stone-900">作品发布成功！</h2>
-      <p className="text-stone-500">你的作品已铸造为 NFT，正在上架中…</p>
+      <p className="text-stone-500">你的作品已铸造并上架，Token ID 为 #{tokenId}</p>
       <div className="flex gap-3">
-        <Button variant="secondary" onClick={() => window.location.href = "/profile"}>
-          查看我的作品
+        <Button variant="secondary" onClick={() => window.location.href = `/works/${tokenId}`}>
+          查看作品详情
         </Button>
         <Button variant="primary" onClick={() => window.location.reload()}>
           继续发布
@@ -448,4 +503,83 @@ function canAdvance(step: number, form: FormData): boolean {
   if (step === 1) return !!form.coverFile && !!form.contentFile
   if (step === 2) return !!form.price && parseFloat(form.price) > 0
   return true
+}
+
+function categoryToIndex(category: string) {
+  return Math.max(CATEGORIES.findIndex((item) => item.value === category), 0)
+}
+
+async function buildContentHash(form: FormData) {
+  const payload = form.contentFile
+    ? await form.contentFile.arrayBuffer()
+    : new TextEncoder().encode(`${form.title}:${Date.now()}`)
+  const digest = await crypto.subtle.digest("SHA-256", payload)
+  const hex = Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+  return `sha256:${hex}`
+}
+
+function buildMetadataURI(form: FormData) {
+  const payload = {
+    title: form.title.trim(),
+    description: form.description.trim(),
+    category: form.category,
+    tags: form.tags.split(",").map((tag) => tag.trim()).filter(Boolean).slice(0, 5),
+    creatorName: "Local Creator",
+    coverImage: buildCoverImage(form.title.trim(), form.category),
+    files: {
+      cover: form.coverFile?.name ?? null,
+      content: form.contentFile?.name ?? null,
+    },
+  }
+
+  return `data:application/json;base64,${btoa(unescape(encodeURIComponent(JSON.stringify(payload))))}`
+}
+
+function buildCoverImage(title: string, category: string) {
+  const label = title || "CultureChain"
+  const accent =
+    category === "painting" ? "#fb7185" :
+    category === "book" ? "#f59e0b" :
+    category === "film" ? "#38bdf8" :
+    category === "music" ? "#8b5cf6" :
+    "#78716c"
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+      <rect width="800" height="1000" fill="#1f1637" />
+      <circle cx="640" cy="220" r="170" fill="${accent}" opacity="0.85" />
+      <circle cx="160" cy="840" r="220" fill="#ffffff" opacity="0.08" />
+      <rect x="64" y="88" width="672" height="824" rx="42" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" />
+      <text x="96" y="170" fill="white" font-size="36" font-family="Arial, sans-serif">CultureChain Local Demo</text>
+      <text x="96" y="720" fill="white" font-size="72" font-family="Georgia, serif">${escapeSvg(label.slice(0, 28))}</text>
+      <text x="96" y="790" fill="rgba(255,255,255,0.72)" font-size="28" font-family="Arial, sans-serif">${escapeSvg(category || "other")}</text>
+    </svg>
+  `
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
+
+function escapeSvg(input: string) {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+}
+
+function extractTokenId(logs: readonly { topics: readonly string[]; data: `0x${string}` }[]) {
+  const [event] = parseEventLogs({
+    abi: CULTURE_NFT_ABI,
+    eventName: "WorkMinted",
+    logs: [...logs] as any,
+  })
+
+  if (!event?.args.tokenId) {
+    throw new Error("未能从交易回执中解析 tokenId")
+  }
+
+  return event.args.tokenId
 }
