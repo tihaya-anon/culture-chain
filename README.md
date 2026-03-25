@@ -39,8 +39,9 @@ make demo-up
 - [架构设计](./docs/architecture.md)
 - [开发计划](./docs/development-plan.md)
 - [智能合约](./docs/smart-contracts.md)
-- [API 文档](./docs/api.md)
 - [部署指南](./docs/deployment.md)
+- [快速启动](./docs/quickstart.md)
+- [Web3 特性与功能](./docs/web3-features.md)
 
 ## 技术栈概览
 

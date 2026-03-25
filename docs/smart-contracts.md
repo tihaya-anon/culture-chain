@@ -1,291 +1,189 @@
 # 智能合约设计文档
 
-## 合约清单
+## 当前已实现合约
 
-| 合约 | 功能 | 标准 |
+当前仓库中真实存在并已测试的合约：
+
+| 合约 | 状态 | 说明 |
 |------|------|------|
-| `CultureNFT` | 文化作品 NFT 发行 | ERC-1155, ERC-2981 |
-| `Marketplace` | 交易市场（上架/购买/报价） | — |
-| `ShopRegistry` | 创作者店铺注册 | — |
+| `CultureNFT.sol` | 已实现 | ERC-1155 + ERC-2981 文化作品 NFT |
+| `Marketplace.sol` | 已实现 | 固定价上架、购买、报价、提现 |
+| `ShopRegistry.sol` | 已实现 | 创作者店铺注册与元数据维护 |
+
+当前**没有**独立的 `RoyaltyRegistry` 合约，旧文档里提到的这部分不属于当前实现。
 
 ---
 
 ## CultureNFT.sol
 
-### 设计要点
+### 已实现能力
 
-- 使用 **ERC-1155** 而非 ERC-721：支持同一作品发行多份（如限量 100 本书），降低 Gas 成本
-- 实现 **ERC-2981** 版税标准：每个 tokenId 可设独立版税率
-- `content_hash` 字段存储作品原文件的 SHA-256 哈希，用于链上版权核查
+- ERC-1155 多份发行
+- ERC-2981 版税标准
+- `mint`
+- `burn`
+- `uri`
+- `getWorkInfo`
+- `verifyContent`
+- `pause / unpause`
 
-### 接口定义
+### 当前核心接口
 
 ```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+function mint(
+    string memory metadataURI,
+    uint96 royaltyBps,
+    uint256 supply,
+    string memory contentHash,
+    WorkCategory category
+) external returns (uint256 tokenId);
 
-interface ICultureNFT {
-    struct WorkInfo {
-        address creator;       // 创作者地址
-        uint96  royaltyBps;    // 版税率 (basis points, 1% = 100)
-        uint256 maxSupply;     // 最大发行量 (0 = 无限)
-        string  contentHash;   // 作品原文件哈希 (sha256:...)
-        WorkCategory category; // 作品分类
-    }
+function burn(uint256 tokenId, uint256 amount) external;
 
-    enum WorkCategory {
-        Painting,  // 0
-        Book,      // 1
-        Film,      // 2
-        Music,     // 3
-        Other      // 4
-    }
+function getWorkInfo(uint256 tokenId) external view returns (WorkInfo memory);
 
-    event WorkMinted(
-        uint256 indexed tokenId,
-        address indexed creator,
-        uint256 supply,
-        string  metadataURI
-    );
-
-    // 铸造单个作品
-    function mint(
-        string memory metadataURI,
-        uint96  royaltyBps,    // 最大 1000 (10%)
-        uint256 supply,        // 发行数量，0 表示无限
-        string memory contentHash,
-        WorkCategory category
-    ) external returns (uint256 tokenId);
-
-    // 批量铸造
-    function mintBatch(
-        string[] memory metadataURIs,
-        uint96[] memory royaltyBps,
-        uint256[] memory supplies,
-        string[] memory contentHashes,
-        WorkCategory[] memory categories
-    ) external returns (uint256[] memory tokenIds);
-
-    // 销毁（创作者可撤回未售出的作品）
-    function burn(uint256 tokenId, uint256 amount) external;
-
-    // 查询作品信息
-    function getWorkInfo(uint256 tokenId) external view returns (WorkInfo memory);
-
-    // 版权核查：传入文件哈希，返回对应 tokenId（0 表示未注册）
-    function verifyContent(string memory contentHash) external view returns (uint256 tokenId);
-}
+function verifyContent(string memory contentHash) external view returns (uint256);
 ```
 
-### 版税计算
+### 当前规则
 
-```
-版税金额 = 成交价 × royaltyBps / 10000
+- `royaltyBps` 最大 `1000`，即 10%
+- `contentHash` 不能为空
+- `contentHash` 不能重复注册
+- `supply = 0` 表示开放版，但当前会先铸 1 份所有权凭证给创作者
 
-示例：
-  成交价 100 MATIC，royaltyBps = 500 (5%)
-  版税 = 100 × 500 / 10000 = 5 MATIC → 打入创作者钱包
-```
+### 当前未实现
+
+- `mintBatch`
+- 复杂的 metadata 更新逻辑
+- 可升级机制
 
 ---
 
 ## Marketplace.sol
 
-### 设计要点
+### 已实现能力
 
-- 支持**固定价格**和**报价**两种交易模式
-- 每笔成交自动分配：平台手续费 + 版税 + 卖家收款
-- 使用 Pull Payment 模式：版税和手续费先记账，用户主动提取，避免 Gas 炸弹
+- `listItem`
+- `delistItem`
+- `buyItem`
+- `makeOffer`
+- `acceptOffer`
+- `cancelOffer`
+- `withdraw`
+- `pendingWithdrawal`
+- `setFeeRate`
+- `setFeeRecipient`
+- `pause / unpause`
 
-### 费用分配
+### 当前费用模型
 
+每笔交易：
+
+```text
+totalPrice
+  = platform fee
+  + royalty
+  + seller proceeds
 ```
-成交价 P
-  └── 平台手续费 = P × platformFeeBps / 10000   (默认 2.5%)
-  └── 版税       = P × royaltyBps / 10000       (创作者设定)
-  └── 卖家收入   = P - 平台手续费 - 版税
-```
 
-### 接口定义
+默认平台手续费：
 
-```solidity
-interface IMarketplace {
-    struct Listing {
-        uint256 tokenId;
-        address seller;
-        uint256 pricePerUnit;  // wei
-        uint256 amount;        // 剩余可购数量
-        bool    active;
-    }
+- `250 bps` = `2.5%`
 
-    struct Offer {
-        uint256 tokenId;
-        address buyer;
-        uint256 pricePerUnit;
-        uint256 amount;
-        uint256 expiresAt;     // Unix timestamp
-        bool    active;
-    }
+版税来源：
 
-    event ItemListed(uint256 indexed listingId, uint256 indexed tokenId, address seller, uint256 price);
-    event ItemSold(uint256 indexed listingId, address buyer, uint256 amount, uint256 totalPrice);
-    event OfferMade(uint256 indexed offerId, uint256 indexed tokenId, address buyer, uint256 price);
-    event OfferAccepted(uint256 indexed offerId);
+- 通过 `IERC2981.royaltyInfo(tokenId, totalPrice)` 查询
 
-    // 上架（需先 setApprovalForAll）
-    function listItem(
-        uint256 tokenId,
-        uint256 pricePerUnit,
-        uint256 amount
-    ) external returns (uint256 listingId);
+### 当前设计特点
 
-    // 下架
-    function delistItem(uint256 listingId) external;
+- Pull Payment 模式
+- `ReentrancyGuard`
+- `Pausable`
+- `Ownable`
 
-    // 修改价格
-    function updatePrice(uint256 listingId, uint256 newPrice) external;
+### 当前未实现
 
-    // 购买（附带 MATIC）
-    function buyItem(uint256 listingId, uint256 amount) external payable;
-
-    // 发出报价（附带 MATIC 锁定）
-    function makeOffer(
-        uint256 tokenId,
-        uint256 amount,
-        uint256 expiresAt
-    ) external payable returns (uint256 offerId);
-
-    // 接受报价（卖家调用）
-    function acceptOffer(uint256 offerId) external;
-
-    // 取消报价（买家调用，退款）
-    function cancelOffer(uint256 offerId) external;
-
-    // 提取收益（Pull Payment）
-    function withdraw() external;
-
-    // 查询待提取金额
-    function pendingWithdrawal(address account) external view returns (uint256);
-}
-```
+- `updatePrice`
+- 订单撮合系统
+- 拍卖
+- 多币种支付
 
 ---
 
 ## ShopRegistry.sol
 
-### 接口定义
+### 已实现能力
 
-```solidity
-interface IShopRegistry {
-    struct Shop {
-        address owner;
-        string  name;         // 店铺名（唯一）
-        string  metadataURI;  // IPFS URI，包含头像、简介、Banner
-        uint256 createdAt;
-        bool    verified;     // 官方认证创作者
-    }
+- `registerShop`
+- `updateShopMeta`
+- `getShop`
+- `getShopByName`
+- `isRegistered`
+- `verifyShop`
 
-    event ShopRegistered(address indexed owner, string name);
-    event ShopUpdated(address indexed owner, string metadataURI);
+### 当前用途
 
-    // 注册店铺（每个地址只能注册一次）
-    function registerShop(string memory name, string memory metadataURI) external;
-
-    // 更新店铺元数据
-    function updateShopMeta(string memory metadataURI) external;
-
-    // 查询店铺
-    function getShop(address owner) external view returns (Shop memory);
-    function getShopByName(string memory name) external view returns (Shop memory);
-    function isRegistered(address owner) external view returns (bool);
-
-    // 官方认证（Admin Only）
-    function verifyShop(address owner) external;
-}
-```
+当前合约已完成并有测试，但前端完整店铺注册流还没有真正接入；前端 `/profile/[address]` 仍偏展示层。
 
 ---
 
-## NFT Metadata 格式
+## 本地 Demo 如何使用这些合约
 
-遵循 OpenSea Metadata Standard，扩展文化作品字段：
+当前本地最小 Demo 的真实链路：
 
-```json
-{
-  "name": "山水之间 No.3",
-  "description": "水墨山水系列第三幅，宣纸水墨，60×90cm",
-  "image": "ipfs://QmXxx.../cover.jpg",
-  "animation_url": "ipfs://QmXxx.../preview.mp4",
-  "external_url": "https://culturechain.io/works/123",
+1. 用户在 `/mint` 填写作品信息
+2. 前端生成 demo metadata
+3. 调用 `CultureNFT.mint`
+4. 调用 `setApprovalForAll`
+5. 调用 `Marketplace.listItem`
+6. 买家在 `/works/[tokenId]` 调用 `Marketplace.buyItem`
 
-  "attributes": [
-    { "trait_type": "category",    "value": "Painting" },
-    { "trait_type": "medium",      "value": "水墨" },
-    { "trait_type": "dimensions",  "value": "60×90cm" },
-    { "trait_type": "year",        "value": "2024" },
-    { "trait_type": "edition",     "value": "1/10" }
-  ],
+也就是说，当前前端真正打通的是：
 
-  "content_hash": "sha256:a1b2c3...",
-  "license": "CC BY-NC 4.0",
-  "encrypted_content": {
-    "ipfs_cid": "QmYyy...",
-    "encryption": "AES-256-GCM",
-    "access_condition": "holds tokenId 42"
-  }
-}
-```
+- NFT 铸造
+- 市场上架
+- 固定价购买
+
+而不是完整生产系统的全部能力。
 
 ---
 
-## 测试策略
+## 测试现状
 
-### 单元测试覆盖场景
+当前仓库中的 Hardhat 测试已覆盖：
 
+- `CultureNFT`
+- `Marketplace`
+- `ShopRegistry`
+
+本地执行入口：
+
+```bash
+make contracts-test
 ```
-CultureNFT
-  ✓ 成功铸造，返回正确 tokenId
-  ✓ 版税率超过 10% 时 revert
-  ✓ 铸造超过 maxSupply 时 revert
-  ✓ 非创作者无法销毁
-  ✓ contentHash 可正确查询
 
-Marketplace
-  ✓ 未授权时上架 revert
-  ✓ 购买价格不足时 revert
-  ✓ 费用分配金额正确（手续费 + 版税 + 卖家）
-  ✓ 下架后无法购买
-  ✓ 报价过期后无法接受
-  ✓ 取消报价正确退款
-  ✓ withdraw 正确提取收益
+测试重点包括：
 
-ShopRegistry
-  ✓ 重复注册 revert
-  ✓ 重名 revert
-  ✓ 非 Owner 无法 verify
-```
+- 铸造成功与边界校验
+- 版税计算
+- content hash 注册校验
+- 上架 / 下架
+- 购买与退款
+- 报价与取消报价
+- 提现
+- 店铺注册与认证
 
 ---
 
-## 部署配置
+## 当前文档边界
 
-```typescript
-// hardhat.config.ts 关键配置
-networks: {
-  polygon: {
-    url: process.env.POLYGON_RPC_URL,
-    accounts: [process.env.DEPLOYER_PRIVATE_KEY],
-    gasPrice: 'auto',
-  },
-  mumbai: {
-    url: 'https://rpc-mumbai.maticvigil.com',
-    accounts: [process.env.DEPLOYER_PRIVATE_KEY],
-  },
-}
-```
+本文件描述的是**当前代码已经存在的合约能力**。
 
-**部署顺序**：
-1. `ShopRegistry`
-2. `CultureNFT`
-3. `Marketplace`（构造函数传入 `CultureNFT` 地址）
-4. 调用 `CultureNFT.setMarketplaceApproval(Marketplace.address)`
+以下能力如果未来需要扩展，应单独新增“规划设计”章节，而不是混在当前实现里：
+
+- 批量铸造
+- 测试网 / 主网部署治理流程
+- 独立 indexer
+- 独立版税注册中心
+- 内容访问控制后端

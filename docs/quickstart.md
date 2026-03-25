@@ -16,9 +16,9 @@
 
 ---
 
-## 模式一：极速启动（推荐新人，5 分钟）
+## 模式一：最小 Demo 启动（推荐）
 
-> 全程使用 mock 数据，**不需要** Docker / 数据库 / 区块链节点 / IPFS。
+> 当前推荐模式：本地链 + 本地前端 + mock/链上混合数据，不依赖真实外部服务。
 
 ```bash
 # 1. 克隆项目
@@ -43,8 +43,8 @@ NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 > 浏览页面和 mock 数据不受影响。
 
 ```bash
-# 4. 启动前端
-make web
+# 4. 启动完整本地 Demo
+make demo-up
 ```
 
 打开 http://localhost:3000 — 完成 🎉
@@ -56,14 +56,14 @@ make web
 | `/` | 首页（Hero + 分类 + 精选作品） |
 | `/works` | 作品列表（分类筛选、排序） |
 | `/works/1` | 作品详情（作品 tokenId 1-8 可访问） |
-| `/mint` | 铸造向导（四步骤表单，mock 提交） |
+| `/mint` | 铸造向导（真实调用本地链 mint/list） |
 | `/profile/0x1234` | 创作者店铺页（任意地址可访问） |
 
 ---
 
-## 模式二：完整开发环境
+## 模式二：扩展本地开发环境
 
-> 接入真实数据库 + 搜索，为 Phase 3 API 开发做准备。
+> 用于继续接数据库和搜索，不是当前最小可运行闭环的必需项。
 
 ### 步骤 1：启动数据库服务
 
@@ -86,13 +86,10 @@ pnpm db:migrate
 pnpm db:studio
 ```
 
-### 步骤 3：启动本地区块链
+### 步骤 3：本地区块链与前端
 
 ```bash
-# 一条命令后台启动本地 Demo：
-# - Hardhat 本地链
-# - 本地合约部署
-# - Next.js 前端
+# 一条命令后台启动本地 Demo
 make demo-up
 ```
 
@@ -124,7 +121,7 @@ logs/web.log
    - 私钥：`0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
    - 余额：10,000 ETH
 
-### 步骤 5：启动前端
+### 步骤 5：状态与关闭
 
 ```bash
 make demo-status
@@ -167,21 +164,27 @@ pnpm format                  # Prettier 格式化所有文件
 
 ---
 
-## Mock 数据说明
+## Demo 数据说明
 
-当前 `apps/web/src/lib/mockData.ts` 提供 8 件示例作品（涵盖画作、书籍、影视、音乐），
-覆盖以下场景：
+当前页面采用“双轨数据来源”：
+
+- 本地链有数据时：优先读取链上事件和合约状态
+- 本地链无数据时：回退到 `apps/web/src/lib/mockData.ts`
+
+当前 mock 数据覆盖以下场景：
 
 | 场景 | 示例 |
 |------|------|
 | 正常在售 | tokenId 1, 2, 3, 5, 6, 7, 8 |
 | 已售罄 | tokenId 4（supply=200, sold=200） |
 | 无限量发行 | tokenId 7（supply=0） |
-| 高价作品 | tokenId 8（3.0 MATIC） |
+| 高价作品 | tokenId 8（3.0 ETH） |
 
-### 替换为真实 API
+### 后续替换方向
 
-页面中所有 mock 调用都通过注释标记了待替换位置：
+下一阶段建议把这些页面从“链上直读 / mock fallback”切换为真正的 API / DB 驱动。
+
+当前不少 mock 调用仍通过注释标记了待替换位置：
 
 ```typescript
 // TODO: 替换为真实 API 调用
