@@ -4,23 +4,23 @@ import { type ReactNode } from "react"
 
 const variants = {
   painting: "bg-rose-100 text-rose-700",
-  book:     "bg-amber-100 text-amber-700",
-  film:     "bg-blue-100  text-blue-700",
-  music:    "bg-violet-100 text-violet-700",
-  other:    "bg-stone-100 text-stone-600",
+  book:     "bg-amber-100 text-amber-800",
+  film:     "bg-sky-100 text-sky-800",
+  music:    "bg-indigo-100 text-indigo-800",
+  other:    "bg-slate-100 text-slate-700",
   verified: "bg-emerald-100 text-emerald-700",
   pending:  "bg-yellow-100 text-yellow-700",
-  sold:     "bg-stone-100 text-stone-400",
+  sold:     "bg-slate-100 text-slate-500",
 } as const
 
 export type BadgeVariant = keyof typeof variants
 
 export const CATEGORY_LABELS: Record<string, string> = {
-  painting: "画作",
-  book:     "书籍",
-  film:     "影视",
-  music:    "音乐",
-  other:    "其他",
+  painting: "Painting",
+  book:     "Book",
+  film:     "Film",
+  music:    "Music",
+  other:    "Other",
 }
 
 interface BadgeProps {

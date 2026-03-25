@@ -9,12 +9,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
 }
 
-const base = "inline-flex items-center justify-center gap-2 font-medium rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
+const base = "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
 
 const variants = {
-  primary:   "bg-violet-700 text-white hover:bg-violet-800 active:scale-95 shadow-sm hover:shadow-md",
-  secondary: "bg-white text-violet-700 border border-violet-200 hover:bg-violet-50 active:scale-95",
-  ghost:     "text-stone-600 hover:bg-stone-100 active:scale-95",
+  primary:   "bg-slate-950 text-white hover:bg-slate-800 active:scale-95 shadow-sm hover:shadow-md",
+  secondary: "border border-slate-300 bg-white/80 text-slate-900 hover:bg-amber-50 active:scale-95",
+  ghost:     "text-slate-600 hover:bg-white/70 active:scale-95",
   danger:    "bg-red-600 text-white hover:bg-red-700 active:scale-95",
 }
 

@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic"
 export async function generateMetadata({ params }: WorkDetailPageProps) {
   const { tokenId } = await params
   const work = await getDemoWork(tokenId) ?? MOCK_WORKS.find((w) => w.tokenId === tokenId)
-  return { title: work?.title ?? "作品详情" }
+  return { title: work?.title ?? "Work detail" }
 }
 
 export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
@@ -29,11 +29,8 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
-
-        {/* ── 左：作品展示 ──────────────────────────────────── */}
         <div className="space-y-6">
-          {/* Cover */}
-          <div className="relative aspect-[4/5] max-h-[600px] w-full overflow-hidden rounded-2xl bg-stone-100 shadow-lg sm:aspect-[3/4]">
+          <div className="relative aspect-[4/5] max-h-[600px] w-full overflow-hidden rounded-[2rem] border border-white/50 bg-slate-100 shadow-[0_24px_90px_rgba(15,23,42,0.14)] sm:aspect-[3/4]">
             <Image
               src={work.coverImage}
               alt={work.title}
@@ -44,27 +41,23 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
             />
           </div>
 
-          {/* 交易历史（占位） */}
-          <div className="rounded-2xl border border-stone-100 bg-white p-5">
-            <h3 className="font-semibold text-stone-800">交易历史</h3>
-            <p className="mt-3 text-sm text-stone-400">暂无交易记录</p>
+          <div className="rounded-[1.75rem] border border-white/60 bg-white/75 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <h3 className="text-xl font-semibold text-slate-900">Trading history</h3>
+            <p className="mt-3 text-sm text-slate-500">No onchain resale activity yet.</p>
           </div>
         </div>
 
-        {/* ── 右：详情 & 购买 ───────────────────────────────── */}
         <div className="space-y-5">
-          {/* Badge + Title */}
           <div>
             <Badge variant={work.category}>
               {CATEGORY_LABELS[work.category] ?? work.category}
             </Badge>
-            <h1 className="mt-3 font-serif text-3xl font-bold leading-tight text-stone-900">
+            <h1 className="mt-3 text-4xl font-bold leading-tight text-slate-950">
               {work.title}
             </h1>
           </div>
 
-          {/* Creator */}
-          <div className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50 p-3">
+          <div className="flex items-center gap-3 rounded-[1.4rem] border border-white/60 bg-white/75 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
             <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-stone-200">
               {work.creator.avatar && (
                 <Image
@@ -76,49 +69,45 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-stone-400">创作者</p>
-              <p className="truncate font-semibold text-stone-800">{work.creator.shopName}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Creator</p>
+              <p className="truncate font-semibold text-slate-800">{work.creator.shopName}</p>
             </div>
-            <span className="ml-auto font-address text-xs text-stone-400">
+            <span className="ml-auto font-address text-xs text-slate-400">
               {work.creator.address.slice(0, 6)}…{work.creator.address.slice(-4)}
             </span>
           </div>
 
-          {/* Price */}
-          <div className="rounded-2xl border border-stone-100 bg-white p-5 shadow-sm">
-            <p className="text-sm text-stone-500">当前价格</p>
-            <p className="mt-1 text-4xl font-bold text-violet-700">{work.priceDisplay}</p>
+          <div className="rounded-[1.75rem] border border-white/60 bg-white/75 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Current price</p>
+            <p className="mt-2 text-4xl font-bold text-slate-950">{work.priceDisplay}</p>
 
-            {/* Supply progress */}
             {work.supply > 0 && (
               <div className="mt-4">
-                <div className="flex justify-between text-xs text-stone-500">
-                  <span>已售 {work.sold}/{work.supply}</span>
+                <div className="flex justify-between text-xs text-slate-500">
+                  <span>Sold {work.sold}/{work.supply}</span>
                   <span>{soldPct}%</span>
                 </div>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-violet-400 transition-all"
+                    className="h-full rounded-full bg-amber-400 transition-all"
                     style={{ width: `${soldPct}%` }}
                   />
                 </div>
                 {remaining !== null && !soldOut && (
-                  <p className="mt-1 text-xs text-stone-400">仅剩 {remaining} 份</p>
+                  <p className="mt-1 text-xs text-slate-400">{remaining} editions left</p>
                 )}
               </div>
             )}
 
-            {/* 购买按钮（客户端交互，抽出为独立组件） */}
             <WorkDetailActions work={work} soldOut={soldOut || !work.listingId} />
           </div>
 
-          {/* NFT Info */}
-          <div className="rounded-2xl border border-stone-100 bg-white p-5 space-y-3 text-sm">
-            <h3 className="font-semibold text-stone-800">链上信息</h3>
+          <div className="space-y-3 rounded-[1.75rem] border border-white/60 bg-white/75 p-5 text-sm shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <h3 className="text-xl font-semibold text-slate-900">Onchain details</h3>
             <InfoRow label="Token ID" value={`#${work.tokenId}`} mono />
-            <InfoRow label="标准" value="ERC-1155" />
-            <InfoRow label="区块链" value="Hardhat Local" />
-            <InfoRow label="版税" value={formatRoyalty(work as { royaltyBps?: unknown })} />
+            <InfoRow label="Standard" value="ERC-1155" />
+            <InfoRow label="Network" value="Hardhat Local" />
+            <InfoRow label="Royalty" value={formatRoyalty(work as { royaltyBps?: unknown })} />
           </div>
         </div>
       </div>
@@ -129,8 +118,8 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="text-stone-500">{label}</span>
-      <span className={`text-stone-800 ${mono ? "font-address" : ""}`}>{value}</span>
+      <span className="text-slate-500">{label}</span>
+      <span className={`text-slate-800 ${mono ? "font-address" : ""}`}>{value}</span>
     </div>
   )
 }

@@ -14,24 +14,24 @@ const Providers = dynamic(
 export const metadata: Metadata = {
   title: {
     template: "%s | CultureChain",
-    default: "CultureChain — Web3 文化作品交易平台",
+    default: "CultureChain | Onchain Culture Marketplace",
   },
-  description: "用区块链守护创作价值，让文化作品自由流转。买卖画作、书籍、影视、音乐数字作品。",
-  keywords: ["NFT", "文化作品", "数字艺术", "Web3", "版权"],
+  description: "Discover, mint, and trade digital culture across art, books, film, and music.",
+  keywords: ["NFT", "digital culture", "art marketplace", "Web3", "royalties"],
   openGraph: {
     type: "website",
-    locale: "zh_CN",
+    locale: "en_US",
     siteName: "CultureChain",
   },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
-      <body className="min-h-screen bg-stone-50 text-stone-900">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen text-slate-950">
         <Providers>
           <Navbar />
-          <div className="animate-fade-in">
+          <div className="animate-fade-in relative">
             {children}
           </div>
         </Providers>

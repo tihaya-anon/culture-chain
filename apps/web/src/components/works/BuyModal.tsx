@@ -33,7 +33,7 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
     setStatus("pending")
     try {
       if (!work.listingId) {
-        throw new Error("当前作品没有可购买的上架单")
+        throw new Error("This work does not have an active listing.")
       }
 
       const hash = await buyItemAsync(
@@ -46,7 +46,7 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
       setStatus("success")
       router.refresh()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "交易失败，请重试"
+      const msg = err instanceof Error ? err.message : "Transaction failed. Please try again."
       setErrorMsg(msg)
       setStatus("error")
     }
@@ -58,34 +58,35 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
       onClick={(e) => e.target === e.currentTarget && status !== "pending" && onClose()}
     >
-      <div className="w-full max-w-md animate-slide-up rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-2xl">
+      <div className="w-full max-w-md animate-slide-up rounded-t-3xl border border-white/60 bg-[#fffcf7] p-6 shadow-2xl sm:rounded-2xl">
 
         {/* ── Confirm ─────────────────────────────────────── */}
         {status === "confirm" && (
           <>
-            <h2 className="font-serif text-xl font-bold text-stone-900">确认购买</h2>
-            <p className="mt-1 text-sm text-stone-500">请仔细核对以下信息</p>
+            <h2 className="text-xl font-bold text-slate-950">Confirm purchase</h2>
+            <p className="mt-1 text-sm text-slate-500">Review the order details before you sign.</p>
 
-            <div className="mt-5 rounded-xl border border-stone-100 bg-stone-50 p-4 space-y-3">
-              <Row label="作品" value={work.title} bold />
-              <Row label="购买数量" value={`${amount} 份`} />
-              <div className="h-px bg-stone-200" />
-              <Row label="作品价格" value={`${work.priceDisplay} × ${amount}`} />
-              <Row label="平台手续费 (2.5%)" value={feeDisp} />
-              <div className="h-px bg-stone-200" />
-              <Row label="合计" value={totalDisp} bold accent />
+            <div className="mt-5 space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+              <Row label="Work" value={work.title} bold />
+              <Row label="Quantity" value={`${amount} edition${amount > 1 ? "s" : ""}`} />
+              <div className="h-px bg-slate-200" />
+              <Row label="Price" value={`${work.priceDisplay} × ${amount}`} />
+              <Row label="Platform fee (2.5%)" value={feeDisp} />
+              <div className="h-px bg-slate-200" />
+              <Row label="Total" value={totalDisp} bold accent />
             </div>
 
-            <p className="mt-3 text-xs text-stone-400">
-              版税将在二级市场流通时自动分配给创作者。购买即表示你同意平台服务条款。
+            <p className="mt-3 text-xs text-slate-400">
+              Royalties are distributed automatically on secondary sales. By purchasing, you agree
+              to the platform terms for this demo environment.
             </p>
 
             <div className="mt-5 flex gap-3">
               <Button variant="secondary" className="flex-1" onClick={onClose}>
-                取消
+                Cancel
               </Button>
               <Button variant="primary" className="flex-1" onClick={handleBuy}>
-                确认购买
+                Confirm
               </Button>
             </div>
           </>
@@ -94,10 +95,10 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
         {/* ── Pending ─────────────────────────────────────── */}
         {status === "pending" && (
           <div className="flex flex-col items-center gap-4 py-8">
-            <div className="h-14 w-14 animate-spin rounded-full border-4 border-stone-200 border-t-violet-600" />
-            <p className="font-semibold text-stone-800">交易处理中</p>
-            <p className="text-center text-sm text-stone-500">
-              请在钱包中确认交易，链上确认可能需要 10–30 秒
+            <div className="h-14 w-14 animate-spin rounded-full border-4 border-slate-200 border-t-amber-500" />
+            <p className="font-semibold text-slate-800">Transaction pending</p>
+            <p className="text-center text-sm text-slate-500">
+              Confirm the request in your wallet. Onchain confirmation may take 10 to 30 seconds.
             </p>
           </div>
         )}
@@ -108,22 +109,22 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
               <CheckIcon className="h-7 w-7 text-emerald-600" />
             </div>
-            <p className="font-serif text-xl font-bold text-stone-900">购买成功！</p>
-            <p className="text-center text-sm text-stone-500">
-              《{work.title}》已转入你的钱包
+            <p className="text-xl font-bold text-slate-950">Purchase complete</p>
+            <p className="text-center text-sm text-slate-500">
+              {work.title} has been transferred to your wallet.
             </p>
             {txHash && (
               <a
                 href={`http://127.0.0.1:8545`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-address text-xs text-violet-600 hover:underline"
+                className="font-address text-xs text-amber-700 hover:underline"
               >
-                交易哈希：{txHash.slice(0, 10)}...{txHash.slice(-8)}
+                Tx hash: {txHash.slice(0, 10)}...{txHash.slice(-8)}
               </a>
             )}
             <Button variant="primary" className="mt-2 w-full" onClick={onClose}>
-              关闭
+              Close
             </Button>
           </div>
         )}
@@ -134,11 +135,11 @@ export function BuyModal({ work, amount = 1, onClose }: BuyModalProps) {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
               <XIcon className="h-7 w-7 text-red-500" />
             </div>
-            <p className="font-semibold text-stone-900">交易失败</p>
-            <p className="text-center text-sm text-stone-500">{errorMsg}</p>
+            <p className="font-semibold text-slate-900">Transaction failed</p>
+            <p className="text-center text-sm text-slate-500">{errorMsg}</p>
             <div className="flex w-full gap-3">
-              <Button variant="ghost" className="flex-1" onClick={onClose}>取消</Button>
-              <Button variant="primary" className="flex-1" onClick={() => setStatus("confirm")}>重试</Button>
+              <Button variant="ghost" className="flex-1" onClick={onClose}>Cancel</Button>
+              <Button variant="primary" className="flex-1" onClick={() => setStatus("confirm")}>Try again</Button>
             </div>
           </div>
         )}
@@ -152,8 +153,8 @@ function Row({
 }: { label: string; value: string; bold?: boolean; accent?: boolean }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="text-stone-500">{label}</span>
-      <span className={`${bold ? "font-semibold" : ""} ${accent ? "text-violet-700" : "text-stone-800"}`}>
+      <span className="text-slate-500">{label}</span>
+      <span className={`${bold ? "font-semibold" : ""} ${accent ? "text-amber-700" : "text-slate-800"}`}>
         {value}
       </span>
     </div>

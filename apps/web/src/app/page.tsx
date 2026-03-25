@@ -9,128 +9,137 @@ export default async function HomePage() {
   const demoWorks = await getDemoWorks()
   const featured = (demoWorks.length > 0 ? demoWorks : MOCK_WORKS).slice(0, 4)
   const stats = [
-    { n: String(featured.length), label: "件作品" },
-    { n: String(new Set(featured.map((work) => work.creator.address)).size), label: "位创作者" },
-    { n: String(featured.reduce((sum, work) => sum + work.sold, 0)), label: "笔成交" },
+    { n: String(featured.length), label: "Works live" },
+    { n: String(new Set(featured.map((work) => work.creator.address)).size), label: "Creators" },
+    { n: String(featured.reduce((sum, work) => sum + work.sold, 0)), label: "Sales tracked" },
   ]
 
   return (
-    <main>
-      {/* ── Hero ────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-violet-900 via-violet-700 to-indigo-800 px-6 pb-24 pt-20 text-white">
-        {/* 背景装饰圆 */}
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/5" />
-        <div className="pointer-events-none absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-violet-500/20" />
+    <main className="pb-20">
+      <section className="relative overflow-hidden px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_top,#1e293b_0%,#0f172a_48%,transparent_78%)]" />
+        <div className="pointer-events-none absolute right-[-5rem] top-10 h-64 w-64 rounded-full bg-amber-300/20 blur-3xl" />
+        <div className="pointer-events-none absolute left-[-4rem] top-40 h-72 w-72 rounded-full bg-white/30 blur-3xl" />
 
-        <div className="relative mx-auto max-w-4xl text-center">
-          {/* 设计亮点：用中英双语排版彰显文化感 */}
-          <p className="mb-4 text-sm font-medium uppercase tracking-[0.25em] text-violet-300">
-            Culture · Chain · Creation
-          </p>
-          <h1 className="font-serif text-5xl font-bold leading-tight tracking-tight sm:text-6xl">
-            让每件文化作品
-            <br />
-            <span className="bg-gradient-to-r from-amber-300 to-yellow-200 bg-clip-text text-transparent">
-              永远属于你
-            </span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-violet-100">
-            区块链确权 · 版税自动分配 · 永久存储
-            <br />
-            画作、书籍、影视、音乐，在这里铸造你的作品
-          </p>
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-white/60 bg-slate-950 px-6 py-12 text-white shadow-[0_30px_120px_rgba(15,23,42,0.24)] sm:px-10 sm:py-16">
+          <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+            <div>
+              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90 sm:text-sm">
+                Curated onchain culture
+              </p>
+              <h1 className="max-w-3xl text-5xl font-bold leading-[0.92] tracking-[-0.04em] sm:text-7xl">
+                Mint work that
+                <span className="mt-2 block bg-gradient-to-r from-amber-200 via-amber-400 to-orange-300 bg-clip-text text-transparent">
+                  deserves a longer life.
+                </span>
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
+                CultureChain turns paintings, books, films, and music into collectible digital editions
+                with programmable royalties and a storefront that feels editorial, not technical.
+              </p>
 
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Link
-              href="/works"
-              className="rounded-full bg-white px-8 py-3.5 text-base font-semibold
-                         text-violet-800 shadow-lg transition hover:bg-amber-50 hover:shadow-xl active:scale-95"
-            >
-              探索作品
-            </Link>
-            <Link
-              href="/mint"
-              className="rounded-full border border-white/40 bg-white/10 px-8 py-3.5
-                         text-base font-semibold text-white backdrop-blur-sm
-                         transition hover:bg-white/20 active:scale-95"
-            >
-              + 发布作品
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="mx-auto mt-14 grid max-w-sm grid-cols-3 gap-4 sm:max-w-none sm:grid-cols-3">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-2xl font-bold text-white sm:text-3xl">{s.n}</div>
-                <div className="mt-0.5 text-sm text-violet-300">{s.label}</div>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/works"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-amber-400 px-8 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
+                >
+                  Explore the marketplace
+                </Link>
+                <Link
+                  href="/mint"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 text-sm font-semibold text-white transition hover:bg-white/16"
+                >
+                  Mint a new release
+                </Link>
               </div>
-            ))}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/6 p-5 backdrop-blur">
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">What stands out</p>
+                <p className="mt-3 font-serif text-2xl text-white">A marketplace with gallery energy.</p>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {stats.map((s) => (
+                  <div key={s.label} className="rounded-[1.35rem] border border-white/10 bg-white/6 p-4 text-center backdrop-blur">
+                    <div className="text-2xl font-bold text-white sm:text-3xl">{s.n}</div>
+                    <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-400">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Categories ──────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <h2 className="font-serif text-2xl font-semibold text-stone-900 sm:text-3xl">
-          按分类浏览
-        </h2>
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Browse by format</p>
+          <h2 className="mt-2 text-3xl font-semibold text-slate-950 sm:text-4xl">
+            Collect stories in more than one shape.
+          </h2>
+        </div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {MOCK_CATEGORIES_STATS.map((cat) => (
             <Link
               key={cat.key}
               href={`/works?category=${cat.key}`}
-              className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-stone-100
-                         bg-white py-8 shadow-sm transition-all hover:-translate-y-1 hover:border-violet-100
-                         hover:shadow-lg hover:shadow-violet-100/50"
+              className="group rounded-[1.6rem] border border-white/70 bg-white/80 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:border-amber-200 hover:shadow-[0_24px_80px_rgba(15,23,42,0.14)]"
             >
-              <span className="text-4xl">{cat.icon}</span>
-              <span className="font-semibold text-stone-800 group-hover:text-violet-700">
+              <div className="flex items-center justify-between">
+                <span className="text-4xl">{cat.icon}</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Category</span>
+              </div>
+              <h3 className="mt-8 text-2xl font-semibold text-slate-950 group-hover:text-amber-700">
                 {cat.label}
-              </span>
-              <span className="text-xs text-stone-400">{cat.count.toLocaleString()} 件作品</span>
+              </h3>
+              <p className="mt-2 text-sm text-slate-500">{cat.count.toLocaleString()} works indexed</p>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* ── Featured Works ──────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
-        <div className="flex items-end justify-between">
-          <h2 className="font-serif text-2xl font-semibold text-stone-900 sm:text-3xl">
-            精选作品
-          </h2>
-          <Link
-            href="/works"
-            className="text-sm font-medium text-violet-600 hover:text-violet-800"
-          >
-            查看全部 →
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Featured drop</p>
+            <h2 className="mt-2 text-3xl font-semibold text-slate-950 sm:text-4xl">
+              Works with momentum, not just metadata.
+            </h2>
+          </div>
+          <Link href="/works" className="text-sm font-semibold text-slate-700 transition hover:text-amber-700">
+            View all works
           </Link>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((work, i) => (
             <WorkCard key={work.tokenId} work={work} priority={i < 2} />
           ))}
         </div>
       </section>
 
-      {/* ── CTA Banner ──────────────────────────────────────── */}
-      <section className="bg-stone-900 px-6 py-16 text-center text-white">
-        <h2 className="font-serif text-3xl font-bold sm:text-4xl">
-          你也是创作者
-        </h2>
-        <p className="mx-auto mt-4 max-w-md text-stone-400">
-          无需懂区块链，像开咸鱼店一样简单。
-          将你的作品铸造为 NFT，开始赚取永久版税。
-        </p>
-        <Link
-          href="/mint"
-          className="mt-8 inline-block rounded-full bg-amber-400 px-10 py-3.5 text-base
-                     font-bold text-stone-900 shadow-lg transition hover:bg-amber-300 active:scale-95"
-        >
-          立即开店，免费发布
-        </Link>
+      <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <div className="rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_65%,#f59e0b_180%)] px-6 py-12 text-white shadow-[0_26px_100px_rgba(15,23,42,0.22)] sm:px-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">For creators</p>
+          <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl font-bold sm:text-4xl">
+                Publish a release that earns every time it moves.
+              </h2>
+              <p className="mt-4 text-base leading-8 text-slate-300">
+                Start with a simple mint flow, set a royalty rate, and open a storefront without
+                dragging your collectors through a dense web3 workflow.
+              </p>
+            </div>
+            <Link
+              href="/mint"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-semibold text-slate-950 transition hover:bg-amber-50"
+            >
+              Start minting
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
   )

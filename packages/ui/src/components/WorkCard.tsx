@@ -17,11 +17,11 @@ export interface WorkCardProps {
 }
 
 const CATEGORY_LABELS: Record<WorkCardProps["category"], string> = {
-  painting: "画作",
-  book: "书籍",
-  film: "影视",
-  music: "音乐",
-  other: "其他",
+  painting: "Painting",
+  book: "Book",
+  film: "Film",
+  music: "Music",
+  other: "Other",
 }
 
 const CATEGORY_COLORS: Record<WorkCardProps["category"], string> = {
@@ -32,7 +32,6 @@ const CATEGORY_COLORS: Record<WorkCardProps["category"], string> = {
   other: "bg-stone-100 text-stone-600",
 }
 
-/** 作品展示卡片 — 用于首页、作品列表 */
 export function WorkCard({
   title,
   category,
@@ -91,12 +90,12 @@ export function WorkCard({
         {/* 底部：价格 + 销量 */}
         <div className="mt-auto flex items-end justify-between">
           <div>
-            <p className="text-xs text-stone-400">售价</p>
+            <p className="text-xs text-stone-400">Price</p>
             <p className="text-base font-bold text-violet-700">{priceDisplay}</p>
           </div>
           {supply > 0 && (
             <div className="text-right">
-              <p className="text-xs text-stone-400">剩余 {remaining}/{supply}</p>
+              <p className="text-xs text-stone-400">{remaining}/{supply} left</p>
               <div className="mt-1 h-1 w-16 rounded-full bg-stone-100">
                 <div
                   className="h-full rounded-full bg-amber-400"

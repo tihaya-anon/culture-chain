@@ -9,7 +9,7 @@ interface WorksPageProps {
 }
 
 export function generateMetadata() {
-  return { title: "探索作品" }
+  return { title: "Marketplace" }
 }
 
 export const dynamic = "force-dynamic"
@@ -26,34 +26,34 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      {/* Page title */}
-      <div className="mb-6">
-        <h1 className="font-serif text-3xl font-bold text-stone-900">
-          {category ? { painting:"画作", book:"书籍", film:"影视", music:"音乐" }[category] ?? "作品" : "全部作品"}
+      <div className="rounded-[2rem] border border-white/60 bg-white/70 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Marketplace</p>
+        <h1 className="mt-2 text-4xl font-bold text-slate-950 sm:text-5xl">
+          {category ? { painting:"Painting", book:"Books", film:"Film", music:"Music", other:"Other" }[category] ?? "Works" : "All works"}
         </h1>
-        <p className="mt-1 text-sm text-stone-500">
-          共 {works.length} 件作品
-          {q && <span> · 搜索「{q}」</span>}
+        <p className="mt-3 text-base text-slate-600">
+          {works.length} works available
+          {q && <span> · Search query: "{q}"</span>}
         </p>
       </div>
 
-      {/* Filters */}
-      <Suspense>
-        <CategoryTabs />
-      </Suspense>
+      <div className="mt-6">
+        <Suspense>
+          <CategoryTabs />
+        </Suspense>
+      </div>
 
-      {/* Grid */}
       {works.length > 0 ? (
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
           {works.map((work, i) => (
             <WorkCard key={work.tokenId} work={work} priority={i < 4} />
           ))}
         </div>
       ) : (
-        <div className="mt-20 flex flex-col items-center gap-3 text-stone-400">
+        <div className="mt-20 flex flex-col items-center gap-3 rounded-[1.75rem] border border-white/60 bg-white/70 py-16 text-slate-400 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
           <span className="text-5xl">🔍</span>
-          <p className="font-semibold">没有找到相关作品</p>
-          <p className="text-sm">试试换个关键词或分类</p>
+          <p className="font-semibold text-slate-700">No matching works found</p>
+          <p className="text-sm">Try a different category or search phrase.</p>
         </div>
       )}
     </main>

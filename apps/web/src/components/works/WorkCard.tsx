@@ -34,13 +34,13 @@ export function WorkCard({ work, priority = false }: WorkCardProps) {
   return (
     <Link
       href={`/works/${work.tokenId}`}
-      className="group flex flex-col overflow-hidden rounded-2xl bg-white
-                 border border-stone-100 shadow-sm
+      className="group flex flex-col overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/80
+                 shadow-[0_20px_60px_rgba(15,23,42,0.08)]
                  transition-all duration-300
-                 hover:-translate-y-1 hover:shadow-xl hover:border-stone-200"
+                 hover:-translate-y-1.5 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] hover:border-amber-200"
     >
       {/* Cover image */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100">
         <Image
           src={work.coverImage}
           alt={work.title}
@@ -49,6 +49,8 @@ export function WorkCard({ work, priority = false }: WorkCardProps) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           priority={priority}
         />
+
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
 
         {/* Category badge overlay */}
         <div className="absolute left-3 top-3">
@@ -61,7 +63,7 @@ export function WorkCard({ work, priority = false }: WorkCardProps) {
         {soldOut && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm">
             <span className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-stone-500 shadow">
-              已售罄
+              Sold out
             </span>
           </div>
         )}
@@ -70,8 +72,8 @@ export function WorkCard({ work, priority = false }: WorkCardProps) {
         {!soldOut && (
           <div className="absolute inset-x-0 bottom-0 translate-y-full p-3
                           transition-transform duration-300 group-hover:translate-y-0">
-            <div className="rounded-xl bg-violet-700 py-2 text-center text-sm font-semibold text-white shadow-lg">
-              立即购买
+            <div className="rounded-xl bg-slate-950 py-2 text-center text-sm font-semibold text-white shadow-lg">
+              Open details
             </div>
           </div>
         )}
@@ -97,15 +99,15 @@ export function WorkCard({ work, priority = false }: WorkCardProps) {
 
         {/* Title */}
         <h3 className="line-clamp-2 font-serif text-sm font-semibold leading-snug text-stone-900
-                       group-hover:text-violet-700 transition-colors">
+                       group-hover:text-amber-700 transition-colors">
           {work.title}
         </h3>
 
         {/* Price + stock */}
         <div className="mt-0.5 flex items-center justify-between">
-          <span className="text-sm font-bold text-violet-700">{work.priceDisplay}</span>
+          <span className="text-sm font-bold text-slate-950">{work.priceDisplay}</span>
           {remaining !== null && !soldOut && (
-            <span className="text-xs text-stone-400">剩余 {remaining}</span>
+            <span className="text-xs text-slate-400">{remaining} left</span>
           )}
         </div>
       </div>

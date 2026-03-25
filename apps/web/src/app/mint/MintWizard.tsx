@@ -32,13 +32,13 @@ const INITIAL: FormData = {
   price: "", supply: "1", royalty: "5",
 }
 
-const STEPS = ["基本信息", "上传文件", "销售设置", "确认发布"]
+const STEPS = ["Basics", "Files", "Pricing", "Review"]
 const CATEGORIES = [
-  { value: "painting", label: "🎨 画作" },
-  { value: "book",     label: "📚 书籍" },
-  { value: "film",     label: "🎬 影视" },
-  { value: "music",    label: "🎵 音乐" },
-  { value: "other",    label: "✨ 其他" },
+  { value: "painting", label: "🎨 Painting" },
+  { value: "book",     label: "📚 Book" },
+  { value: "film",     label: "🎬 Film" },
+  { value: "music",    label: "🎵 Music" },
+  { value: "other",    label: "✨ Other" },
 ]
 
 // ── Wizard ────────────────────────────────────────────────────
@@ -65,8 +65,8 @@ export function MintWizard() {
     return (
       <div className="rounded-2xl border border-stone-100 bg-white p-10 text-center shadow-sm">
         <p className="text-4xl">🔗</p>
-        <p className="mt-4 font-semibold text-stone-800">请先连接钱包</p>
-        <p className="mt-2 text-sm text-stone-500">需要连接钱包才能发布作品</p>
+        <p className="mt-4 font-semibold text-stone-800">Connect your wallet first</p>
+        <p className="mt-2 text-sm text-stone-500">A connected wallet is required before you can mint a release.</p>
       </div>
     )
   }
@@ -75,9 +75,9 @@ export function MintWizard() {
     return (
       <div className="rounded-2xl border border-amber-100 bg-amber-50 p-8 text-center shadow-sm">
         <p className="text-3xl">⛓️</p>
-        <p className="mt-4 font-semibold text-amber-900">本地合约还没部署</p>
+        <p className="mt-4 font-semibold text-amber-900">Local contracts are not deployed yet</p>
         <p className="mt-2 text-sm text-amber-800">
-          先启动 Hardhat 节点并执行 `pnpm contracts:deploy:local`，前端才会进入真实铸造流程。
+          Start the Hardhat node and run `make deploy-local` before using the real mint flow.
         </p>
       </div>
     )
@@ -120,15 +120,14 @@ export function MintWizard() {
       setDone({ tokenId: tokenId.toString() })
       router.refresh()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "链上交易失败，请重试")
+      setError(err instanceof Error ? err.message : "The onchain transaction failed. Please try again.")
     } finally {
       setMinting(false)
     }
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-sm">
-      {/* Progress */}
+    <div className="overflow-hidden rounded-[2rem] border border-white/60 bg-white/80 shadow-[0_20px_80px_rgba(15,23,42,0.10)]">
       <StepHeader current={step} />
 
       <div className="p-6 sm:p-8">
@@ -144,12 +143,8 @@ export function MintWizard() {
 
         {/* Nav */}
         <div className="mt-8 flex justify-between gap-4 border-t border-stone-100 pt-6">
-          <Button
-            variant="ghost"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0 || minting}
-          >
-            ← 上一步
+          <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0 || minting}>
+            Back
           </Button>
           {step < 3 ? (
             <Button
@@ -157,7 +152,7 @@ export function MintWizard() {
               onClick={() => setStep((s) => s + 1)}
               disabled={!canAdvance(step, form)}
             >
-              下一步 →
+              Continue
             </Button>
           ) : (
             <Button
@@ -166,7 +161,7 @@ export function MintWizard() {
               loading={minting}
               onClick={handleMint}
             >
-              确认铸造
+              Mint and list
             </Button>
           )}
         </div>
@@ -179,16 +174,16 @@ export function MintWizard() {
 
 function StepHeader({ current }: { current: number }) {
   return (
-    <div className="border-b border-stone-100 bg-stone-50 px-6 py-4">
+    <div className="border-b border-slate-100 bg-[#fffaf1] px-6 py-4">
       <div className="flex items-center gap-2">
         {STEPS.map((label, i) => (
           <div key={label} className="flex items-center gap-2">
-            {i > 0 && <div className={`h-px w-6 sm:w-10 ${i <= current ? "bg-violet-400" : "bg-stone-200"}`} />}
+            {i > 0 && <div className={`h-px w-6 sm:w-10 ${i <= current ? "bg-amber-400" : "bg-stone-200"}`} />}
             <div className="flex items-center gap-1.5">
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-colors
-                  ${i < current  ? "bg-violet-600 text-white"
-                  : i === current ? "border-2 border-violet-600 text-violet-700 bg-white"
+                  ${i < current  ? "bg-slate-950 text-white"
+                  : i === current ? "border-2 border-amber-500 text-amber-700 bg-white"
                   : "bg-stone-200 text-stone-400"}`}
               >
                 {i < current ? "✓" : i + 1}
@@ -209,20 +204,20 @@ function StepHeader({ current }: { current: number }) {
 function Step1({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) => void }) {
   return (
     <div className="space-y-5">
-      <SectionTitle>作品基本信息</SectionTitle>
+      <SectionTitle>Release basics</SectionTitle>
 
-      <Field label="作品名称" required>
+      <Field label="Title" required>
         <input
           type="text"
           value={form.title}
           onChange={(e) => patch({ title: e.target.value })}
-          placeholder="例：山水之间 No.3"
+          placeholder="Example: Between Mountains No. 3"
           maxLength={100}
           className={inputCls}
         />
       </Field>
 
-      <Field label="分类" required>
+      <Field label="Category" required>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {CATEGORIES.map((c) => (
             <button
@@ -240,22 +235,22 @@ function Step1({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) 
         </div>
       </Field>
 
-      <Field label="作品描述" hint="向买家介绍这件作品">
+      <Field label="Description" hint="Give collectors context for the work.">
         <textarea
           value={form.description}
           onChange={(e) => patch({ description: e.target.value })}
-          placeholder="创作背景、材质、尺幅、获奖经历…"
+          placeholder="Concept, material, release notes, or the story behind the piece."
           rows={4}
           className={`${inputCls} resize-none`}
         />
       </Field>
 
-      <Field label="标签" hint="用逗号分隔，最多 5 个">
+      <Field label="Tags" hint="Comma-separated, up to five tags.">
         <input
           type="text"
           value={form.tags}
           onChange={(e) => patch({ tags: e.target.value })}
-          placeholder="水墨, 山水, 原创"
+          placeholder="Ink, landscape, original"
           className={inputCls}
         />
       </Field>
@@ -268,14 +263,14 @@ function Step1({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) 
 function Step2({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) => void }) {
   return (
     <div className="space-y-5">
-      <SectionTitle>上传作品文件</SectionTitle>
+      <SectionTitle>Upload files</SectionTitle>
       <p className="text-sm text-stone-500">
-        封面图将公开展示，正文文件加密存储，仅 NFT 持有者可下载。
+        The cover is public-facing. The source file is stored for ownership and delivery in the demo flow.
       </p>
 
       <UploadZone
-        label="封面图"
-        hint="JPG / PNG / WEBP，建议 3:4 比例，最大 10MB"
+        label="Cover image"
+        hint="JPG / PNG / WEBP, recommended 3:4, max 10MB."
         accept="image/jpeg,image/png,image/webp"
         file={form.coverFile}
         onChange={(f) => patch({ coverFile: f })}
@@ -283,8 +278,8 @@ function Step2({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) 
       />
 
       <UploadZone
-        label="正文文件"
-        hint="画作可上传高清原图；书籍上传 PDF；视频上传 MP4，最大 500MB"
+        label="Source file"
+        hint="Use a high-res original, PDF, MP4, or audio file. Max 500MB."
         accept="image/*,application/pdf,video/mp4,audio/*"
         file={form.contentFile}
         onChange={(f) => patch({ contentFile: f })}
@@ -304,19 +299,19 @@ function UploadZone({
     <Field label={label} hint={hint} required={required}>
       <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl
                         border-2 border-dashed border-stone-200 bg-stone-50 p-8 text-center
-                        transition-colors hover:border-violet-300 hover:bg-violet-50">
+                        transition-colors hover:border-amber-300 hover:bg-amber-50">
         {file ? (
           <>
             <span className="text-2xl">✅</span>
             <span className="text-sm font-medium text-stone-700">{file.name}</span>
             <span className="text-xs text-stone-400">
-              {(file.size / 1024 / 1024).toFixed(2)} MB · 点击替换
+              {(file.size / 1024 / 1024).toFixed(2)} MB · click to replace
             </span>
           </>
         ) : (
           <>
             <span className="text-3xl text-stone-300">📎</span>
-            <span className="text-sm font-medium text-stone-600">点击或拖拽上传</span>
+            <span className="text-sm font-medium text-stone-600">Click or drag to upload</span>
             <span className="text-xs text-stone-400">{hint}</span>
           </>
         )}
@@ -339,9 +334,9 @@ function Step3({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) 
 
   return (
     <div className="space-y-5">
-      <SectionTitle>销售设置</SectionTitle>
+      <SectionTitle>Pricing and royalties</SectionTitle>
 
-      <Field label="售价（MATIC）" required hint="买家支付的单价">
+      <Field label="Price (ETH)" required hint="Single-edition price paid by the collector.">
         <div className="relative">
           <input
             type="number"
@@ -352,11 +347,11 @@ function Step3({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) 
             step="0.01"
             className={`${inputCls} pr-16`}
           />
-          <span className="absolute right-4 top-2.5 text-sm font-medium text-stone-400">MATIC</span>
+          <span className="absolute right-4 top-2.5 text-sm font-medium text-stone-400">ETH</span>
         </div>
       </Field>
 
-      <Field label="发行数量" required hint="设为 0 表示不限量">
+      <Field label="Edition size" required hint="Set to 0 for an open edition.">
         <input
           type="number"
           value={form.supply}
@@ -367,42 +362,41 @@ function Step3({ form, patch }: { form: FormData; patch: (u: Partial<FormData>) 
         />
       </Field>
 
-      <Field label="版税率 (%)" required hint="二级市场每次转售，你将自动获得的版税比例（最高 10%）">
+      <Field label="Royalty (%)" required hint="Applied to every secondary sale. Maximum 10%.">
         <div className="space-y-2">
           <input
             type="range"
             min="0" max="10" step="0.5"
             value={form.royalty}
             onChange={(e) => patch({ royalty: e.target.value })}
-            className="w-full accent-violet-600"
+            className="w-full accent-amber-500"
           />
           <div className="flex justify-between text-xs text-stone-400">
             <span>0%</span>
-            <span className="font-semibold text-violet-700">{form.royalty}%</span>
+            <span className="font-semibold text-amber-700">{form.royalty}%</span>
             <span>10%</span>
           </div>
         </div>
       </Field>
 
-      {/* Preview */}
       {price > 0 && (
         <div className="rounded-xl bg-stone-50 p-4 text-sm space-y-2">
-          <p className="font-semibold text-stone-700">收益预览（首次销售）</p>
+          <p className="font-semibold text-stone-700">Revenue preview (primary sale)</p>
           <div className="flex justify-between text-stone-500">
-            <span>售价</span>
-            <span>{price.toFixed(4)} MATIC</span>
+            <span>Price</span>
+            <span>{price.toFixed(4)} ETH</span>
           </div>
           <div className="flex justify-between text-stone-500">
-            <span>平台手续费 (2.5%)</span>
-            <span>- {(price * 0.025).toFixed(4)} MATIC</span>
+            <span>Platform fee (2.5%)</span>
+            <span>- {(price * 0.025).toFixed(4)} ETH</span>
           </div>
           <div className="h-px bg-stone-200" />
-          <div className="flex justify-between font-semibold text-violet-700">
-            <span>你实际到手</span>
-            <span>{(price * 0.975).toFixed(4)} MATIC</span>
+          <div className="flex justify-between font-semibold text-amber-700">
+            <span>You receive</span>
+            <span>{(price * 0.975).toFixed(4)} ETH</span>
           </div>
           <p className="text-xs text-stone-400">
-            二级市场转售时你还将额外获得 {royalty}% 版税
+            Secondary sales add another {royalty}% royalty stream.
           </p>
         </div>
       )}
@@ -417,17 +411,17 @@ function Step4({
 }: { form: FormData; minting: boolean; onMint: () => void }) {
   return (
     <div className="space-y-5">
-      <SectionTitle>确认发布信息</SectionTitle>
+      <SectionTitle>Review and publish</SectionTitle>
 
       <div className="divide-y divide-stone-100 rounded-xl border border-stone-100 overflow-hidden">
         {[
-          { label: "作品名称",   value: form.title },
-          { label: "分类",       value: CATEGORIES.find(c => c.value === form.category)?.label ?? "-" },
-          { label: "封面图",     value: form.coverFile?.name ?? "未选择" },
-          { label: "正文文件",   value: form.contentFile?.name ?? "未选择" },
-          { label: "售价",       value: `${form.price || "0"} MATIC` },
-          { label: "发行数量",   value: Number(form.supply) === 0 ? "不限量" : form.supply },
-          { label: "版税率",     value: `${form.royalty}%` },
+          { label: "Title", value: form.title },
+          { label: "Category", value: CATEGORIES.find(c => c.value === form.category)?.label ?? "-" },
+          { label: "Cover image", value: form.coverFile?.name ?? "Not selected" },
+          { label: "Source file", value: form.contentFile?.name ?? "Not selected" },
+          { label: "Price", value: `${form.price || "0"} ETH` },
+          { label: "Edition size", value: Number(form.supply) === 0 ? "Open edition" : form.supply },
+          { label: "Royalty", value: `${form.royalty}%` },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center justify-between px-4 py-3 text-sm">
             <span className="text-stone-500">{label}</span>
@@ -437,16 +431,16 @@ function Step4({
       </div>
 
       <div className="rounded-xl bg-amber-50 border border-amber-100 p-4 text-sm text-amber-800">
-        <p className="font-semibold">发布前请确认：</p>
+        <p className="font-semibold">Before you publish</p>
         <ul className="mt-2 list-inside list-disc space-y-1 text-amber-700">
-          <li>作品版权归你所有，不侵犯他人知识产权</li>
-          <li>内容符合平台规范，不含违规内容</li>
-          <li>链上操作不可撤销，确认无误再提交</li>
+          <li>You own the rights to the work or have permission to release it.</li>
+          <li>The content follows platform policy and contains no restricted material.</li>
+          <li>Onchain actions are irreversible once confirmed.</li>
         </ul>
       </div>
 
       <p className="text-xs text-stone-400 text-center">
-        预计 Gas 费用 &lt; 0.01 MATIC · 铸造到 Polygon 网络
+        Estimated gas &lt; 0.01 ETH on the local demo network
       </p>
     </div>
   )
@@ -458,14 +452,14 @@ function MintSuccess({ tokenId }: { tokenId: string }) {
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl">
         🎉
       </div>
-      <h2 className="font-serif text-2xl font-bold text-stone-900">作品发布成功！</h2>
-      <p className="text-stone-500">你的作品已铸造并上架，Token ID 为 #{tokenId}</p>
+      <h2 className="font-serif text-2xl font-bold text-stone-900">Release published</h2>
+      <p className="text-stone-500">Your work has been minted and listed. Token ID #{tokenId} is now live.</p>
       <div className="flex gap-3">
         <Button variant="secondary" onClick={() => window.location.href = `/works/${tokenId}`}>
-          查看作品详情
+          Open work
         </Button>
         <Button variant="primary" onClick={() => window.location.reload()}>
-          继续发布
+          Mint another
         </Button>
       </div>
     </div>
@@ -485,7 +479,7 @@ function Field({
     <div className="space-y-1.5">
       <label className="block text-sm font-medium text-stone-700">
         {label}
-        {required && <span className="ml-1 text-violet-500">*</span>}
+        {required && <span className="ml-1 text-amber-600">*</span>}
       </label>
       {children}
       {hint && <p className="text-xs text-stone-400">{hint}</p>}
@@ -495,8 +489,8 @@ function Field({
 
 const inputCls =
   "w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-900 " +
-  "placeholder:text-stone-400 focus:border-violet-300 focus:bg-white focus:outline-none " +
-  "focus:ring-2 focus:ring-violet-100 transition-all"
+  "placeholder:text-stone-400 focus:border-amber-300 focus:bg-white focus:outline-none " +
+  "focus:ring-2 focus:ring-amber-100 transition-all"
 
 function canAdvance(step: number, form: FormData): boolean {
   if (step === 0) return !!form.title && !!form.category
@@ -578,7 +572,7 @@ function extractTokenId(logs: readonly { topics: readonly string[]; data: `0x${s
   })
 
   if (!event?.args.tokenId) {
-    throw new Error("未能从交易回执中解析 tokenId")
+    throw new Error("Could not parse the tokenId from the transaction receipt.")
   }
 
   return event.args.tokenId

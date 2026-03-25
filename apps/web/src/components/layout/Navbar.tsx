@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 
 const CATEGORIES = [
-  { label: "画作", href: "/works?category=painting" },
-  { label: "书籍", href: "/works?category=book" },
-  { label: "影视", href: "/works?category=film" },
-  { label: "音乐", href: "/works?category=music" },
+  { label: "Painting", href: "/works?category=painting" },
+  { label: "Books", href: "/works?category=book" },
+  { label: "Film", href: "/works?category=film" },
+  { label: "Music", href: "/works?category=music" },
 ]
 
 export function Navbar() {
@@ -18,13 +18,13 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-white/60 bg-[#fffcf7]/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
 
         {/* Logo */}
         <Link
           href="/"
-          className="mr-2 flex-shrink-0 font-serif text-xl font-bold text-violet-700 tracking-tight"
+          className="mr-2 flex-shrink-0 font-serif text-xl font-bold tracking-tight text-slate-950"
         >
           CultureChain
         </Link>
@@ -37,8 +37,8 @@ export function Navbar() {
               href={c.href}
               className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors
                 ${pathname === c.href
-                  ? "bg-violet-50 text-violet-700"
-                  : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"}`}
+                  ? "bg-slate-950 text-white"
+                  : "text-slate-600 hover:bg-white hover:text-slate-950"}`}
             >
               {c.label}
             </Link>
@@ -53,32 +53,31 @@ export function Navbar() {
           <div className="relative">
             <input
               type="search"
-              placeholder="搜索作品、创作者..."
-              className="h-9 w-56 rounded-full border border-stone-200 bg-stone-50 pl-9 pr-4 text-sm
-                         text-stone-800 placeholder:text-stone-400
-                         focus:border-violet-300 focus:bg-white focus:outline-none focus:ring-2
-                         focus:ring-violet-100 transition-all duration-200 lg:w-72"
+              placeholder="Search works or creators"
+              className="h-10 w-56 rounded-full border border-slate-200 bg-white/80 pl-9 pr-4 text-sm
+                         text-slate-800 placeholder:text-slate-400
+                         focus:border-amber-300 focus:bg-white focus:outline-none focus:ring-2
+                         focus:ring-amber-100 transition-all duration-200 lg:w-72"
             />
-            <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-stone-400" />
+            <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
           </div>
         </div>
 
         {/* Mobile search toggle */}
         <button
-          className="rounded-full p-2 text-stone-500 hover:bg-stone-100 md:hidden"
+          className="rounded-full p-2 text-slate-500 hover:bg-white md:hidden"
           onClick={() => setSearchOpen(!searchOpen)}
-          aria-label="搜索"
+          aria-label="Search"
         >
           <SearchIcon className="h-5 w-5" />
         </button>
 
-        {/* 发布作品 */}
         <Link
           href="/mint"
-          className="hidden rounded-full border border-violet-200 px-4 py-1.5 text-sm
-                     font-medium text-violet-700 transition hover:bg-violet-50 sm:block"
+          className="hidden rounded-full border border-slate-300 px-4 py-1.5 text-sm
+                     font-medium text-slate-900 transition hover:bg-amber-50 sm:block"
         >
-          + 发布
+          Mint
         </Link>
 
         {/* Wallet */}
@@ -90,9 +89,9 @@ export function Navbar() {
 
         {/* Mobile menu toggle */}
         <button
-          className="rounded-full p-2 text-stone-500 hover:bg-stone-100 md:hidden"
+          className="rounded-full p-2 text-slate-500 hover:bg-white md:hidden"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="菜单"
+          aria-label="Menu"
         >
           {menuOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
         </button>
@@ -100,31 +99,30 @@ export function Navbar() {
 
       {/* Mobile search bar */}
       {searchOpen && (
-        <div className="border-t border-stone-100 px-4 py-3 md:hidden">
+        <div className="border-t border-white/60 px-4 py-3 md:hidden">
           <div className="relative">
             <input
               type="search"
-              placeholder="搜索作品、创作者..."
-              className="h-10 w-full rounded-full border border-stone-200 bg-stone-50 pl-10 pr-4 text-sm
-                         focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-100"
+              placeholder="Search works or creators"
+              className="h-10 w-full rounded-full border border-slate-200 bg-white/80 pl-10 pr-4 text-sm
+                         focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-100"
               autoFocus
             />
-            <SearchIcon className="absolute left-3.5 top-3 h-4 w-4 text-stone-400" />
+            <SearchIcon className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
           </div>
         </div>
       )}
 
-      {/* Mobile nav menu */}
       {menuOpen && (
-        <div className="border-t border-stone-100 bg-white px-4 pb-4 md:hidden">
+        <div className="border-t border-white/60 bg-[#fffcf7] px-4 pb-4 md:hidden">
           <nav className="mt-3 grid grid-cols-2 gap-2">
             {CATEGORIES.map((c) => (
               <Link
                 key={c.href}
                 href={c.href}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-xl border border-stone-100 px-4 py-3 text-sm
-                           font-medium text-stone-700 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+                className="rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm
+                           font-medium text-slate-700 hover:border-amber-200 hover:bg-amber-50 hover:text-slate-950"
               >
                 {c.label}
               </Link>
@@ -133,10 +131,10 @@ export function Navbar() {
           <Link
             href="/mint"
             onClick={() => setMenuOpen(false)}
-            className="mt-3 block w-full rounded-full bg-violet-700 py-2.5 text-center
+            className="mt-3 block w-full rounded-full bg-slate-950 py-2.5 text-center
                        text-sm font-semibold text-white"
           >
-            + 发布作品
+            Mint New Work
           </Link>
         </div>
       )}

@@ -134,3 +134,41 @@ wait_for_tcp() {
   say "timeout waiting for $host:$port"
   return 1
 }
+
+port_pids() {
+  local port="$1"
+  local raw=""
+
+  if command -v lsof >/dev/null 2>&1; then
+    raw="$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$raw" ]] && command -v ss >/dev/null 2>&1; then
+    raw="$(ss -ltnp "( sport = :$port )" 2>/dev/null | awk -F 'pid=' 'NR > 1 && NF > 1 {split($2, a, ","); print a[1]}' || true)"
+  fi
+
+  if [[ -z "$raw" ]] && command -v fuser >/dev/null 2>&1; then
+    raw="$(fuser ${port}/tcp 2>/dev/null || true)"
+  fi
+
+  printf '%s' "$raw" | tr ' ' '
+' | sed '/^$/d' | sort -u | tr '
+' ' ' | sed 's/[[:space:]]*$//'
+}
+
+fail_if_port_busy() {
+  local port="$1"
+  local pids
+  pids="$(port_pids "$port")"
+
+  if [[ -z "$pids" ]]; then
+    return 0
+  fi
+
+  say "port $port is already in use"
+  say "pid(s): $pids"
+  for pid in $pids; do
+    say "kill command: kill $pid"
+  done
+  return 1
+}

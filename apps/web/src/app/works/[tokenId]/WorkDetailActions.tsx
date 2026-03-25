@@ -12,8 +12,8 @@ export function WorkDetailActions({ work, soldOut }: { work: Work; soldOut: bool
 
   if (soldOut) {
     return (
-      <div className="mt-5 rounded-xl bg-stone-100 py-3 text-center text-sm font-semibold text-stone-400">
-        已售罄
+      <div className="mt-5 rounded-xl bg-slate-100 py-3 text-center text-sm font-semibold text-slate-500">
+        Sold out
       </div>
     )
   }
@@ -28,11 +28,11 @@ export function WorkDetailActions({ work, soldOut }: { work: Work; soldOut: bool
             className="flex-1"
             onClick={() => setShowBuy(true)}
           >
-            立即购买
+            Buy now
           </Button>
         ) : (
-          <div className="flex-1 rounded-full bg-stone-100 py-3 text-center text-sm font-semibold text-stone-500">
-            连接钱包后购买
+          <div className="flex-1 rounded-full bg-slate-100 py-3 text-center text-sm font-semibold text-slate-500">
+            Connect a wallet to continue
           </div>
         )}
       </div>

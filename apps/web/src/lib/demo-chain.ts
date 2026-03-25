@@ -103,13 +103,13 @@ function toWork(input: {
 }): DemoWork {
   const metadata = decodeMetadataURI(input.metadataURI)
   const supply = Number(input.maxSupply === 0n ? 0n : input.maxSupply)
-  const title = metadata?.title?.trim() || `作品 #${input.tokenId.toString()}`
+  const title = metadata?.title?.trim() || `Work #${input.tokenId.toString()}`
   const creatorName = metadata?.creatorName?.trim() || input.creatorName || shortenAddress(input.creator)
 
   return {
     tokenId: input.tokenId.toString(),
     title,
-    description: metadata?.description?.trim() || "本地链演示作品",
+    description: metadata?.description?.trim() || "Local demo work",
     metadataURI: input.metadataURI,
     category: categoryFromIndex(input.category),
     coverImage: metadata?.coverImage?.trim() || DEFAULT_COVER,

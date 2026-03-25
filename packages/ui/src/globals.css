@@ -2,30 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Google Fonts ──────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ── Design Tokens ─────────────────────────────────────────── */
 @layer base {
   :root {
     /* Brand Colors */
-    --color-primary:        221 80% 43%;   /* violet-700 #3730a3-ish → custom hsl */
-    --color-primary-light:  250 100% 93%;  /* violet-100 */
-    --color-accent:         38 92% 50%;    /* amber-500 */
+    --color-primary:        220 58% 18%;
+    --color-primary-light:  214 44% 92%;
+    --color-accent:         37 93% 56%;
 
     /* Surface */
-    --color-background:     30 14% 97%;    /* stone-50 #fafaf9 */
-    --color-surface:        0 0% 100%;     /* white */
+    --color-background:     40 33% 98%;
+    --color-surface:        0 0% 100%;
     --color-surface-raised: 0 0% 100%;
 
     /* Text */
-    --color-text:           25 10% 15%;    /* stone-900 */
-    --color-text-muted:     25 6% 46%;     /* stone-500 */
-    --color-text-subtle:    25 5% 63%;     /* stone-400 */
+    --color-text:           222 47% 11%;
+    --color-text-muted:     215 16% 38%;
+    --color-text-subtle:    215 14% 56%;
 
     /* Border */
-    --color-border:         25 6% 88%;     /* stone-200 */
-    --color-border-muted:   25 6% 93%;     /* stone-100 */
+    --color-border:         214 25% 87%;
+    --color-border-muted:   214 27% 93%;
 
     /* Semantic */
     --color-success:        142 71% 45%;   /* emerald-500 */
@@ -40,7 +39,6 @@
     --radius-full: 9999px;
   }
 
-  /* Dark mode — 当需要时开启 */
   .dark {
     --color-background:     240 10% 8%;
     --color-surface:        240 10% 12%;
@@ -59,34 +57,41 @@
   }
 
   body {
-    @apply bg-stone-50 text-stone-900 antialiased;
-    font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    @apply antialiased text-slate-950;
+    background:
+      radial-gradient(circle at top left, rgba(245, 158, 11, 0.14), transparent 28rem),
+      radial-gradient(circle at top right, rgba(30, 41, 59, 0.08), transparent 26rem),
+      linear-gradient(180deg, #fffcf7 0%, #f7f2e8 100%);
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 
-  /* 标题使用 Noto Serif SC，彰显文化质感 */
-  h1, h2 {
-    font-family: 'Noto Serif SC', 'Songti SC', 'SimSun', Georgia, serif;
+  h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.03em;
+  }
+
+  ::selection {
+    background: rgba(245, 158, 11, 0.22);
+  }
+
+  main {
+    position: relative;
   }
 }
 
-/* ── Utility Classes ────────────────────────────────────────── */
 @layer utilities {
-  /* 作品卡片悬浮效果 */
   .card-hover {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
   }
 
-  /* 渐变品牌背景 */
   .bg-brand-gradient {
-    @apply bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-600;
+    @apply bg-gradient-to-br from-slate-950 via-slate-800 to-amber-500;
   }
 
-  /* 玻璃拟态 */
   .glass {
-    @apply bg-white/80 backdrop-blur-sm border border-white/60;
+    @apply border border-white/60 bg-white/70 backdrop-blur-md;
   }
 
-  /* 文字截断 */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -94,9 +99,8 @@
     overflow: hidden;
   }
 
-  /* Web3 地址字体 */
   .font-address {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', monospace;
     @apply text-xs tracking-wide;
   }
 }

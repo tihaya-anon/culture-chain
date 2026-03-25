@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
-run_logged "web" pnpm --filter @culture-chain/web dev
+fail_if_port_busy 3000
+run_logged "web" env PORT=3000 pnpm --filter @culture-chain/web dev

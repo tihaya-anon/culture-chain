@@ -19,7 +19,7 @@ const STATUS_CONFIG = {
       </svg>
     ),
     bg: "bg-amber-50 border-amber-200",
-    title: "交易处理中",
+    title: "Transaction pending",
   },
   success: {
     icon: (
@@ -28,7 +28,7 @@ const STATUS_CONFIG = {
       </svg>
     ),
     bg: "bg-emerald-50 border-emerald-200",
-    title: "交易成功",
+    title: "Transaction complete",
   },
   error: {
     icon: (
@@ -37,11 +37,10 @@ const STATUS_CONFIG = {
       </svg>
     ),
     bg: "bg-red-50 border-red-200",
-    title: "交易失败",
+    title: "Transaction failed",
   },
 }
 
-/** 交易状态 Toast — Web3 交互的三态反馈 */
 export function TxStatusToast({
   status,
   txHash,
@@ -67,7 +66,7 @@ export function TxStatusToast({
             rel="noopener noreferrer"
             className="mt-1 inline-flex items-center gap-1 text-xs text-violet-600 hover:underline"
           >
-            查看链上记录
+            View onchain record
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
@@ -78,7 +77,7 @@ export function TxStatusToast({
         <button
           onClick={onClose}
           className="flex-shrink-0 text-stone-400 hover:text-stone-600"
-          aria-label="关闭"
+          aria-label="Close"
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
