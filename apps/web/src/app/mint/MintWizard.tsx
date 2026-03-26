@@ -388,7 +388,7 @@ function MintSuccess({ tokenId }: { tokenId: string }) {
       <h2 className="font-serif text-2xl font-bold text-stone-900">Release published</h2>
       <p className="text-stone-500">Your work is now available in the static demo catalog as token #{tokenId}.</p>
       <div className="flex gap-3">
-        <Button variant="secondary" onClick={() => window.location.assign(`/works/${tokenId}`)}>
+        <Button variant="secondary" onClick={() => window.location.assign(`../works/${tokenId}`)}>
           Open work
         </Button>
         <Button variant="primary" onClick={() => window.location.reload()}>
